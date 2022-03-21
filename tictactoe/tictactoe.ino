@@ -22,6 +22,15 @@ const char PLACE_PIN = 8;
 int x_pos = 0;
 int y_pos = 0;
 
+// Gameboard
+const char PIECE_X = 'x';
+const char PIECE_O = 'o';
+const char PIECE_EMPTY = '-';
+int game[3][3];
+bool winner;
+const char who;
+
+
 // --#--#--
 // --#--#--
 // ########
@@ -31,7 +40,7 @@ int y_pos = 0;
 // --#--#--
 // --#--#--
 
-//grid 
+// LED grid mappings 
 int board[3][3] = { {new G(8, 9, 22, 23), new G(38, 39, 40, 41), new G(56, 57, 70, 71)}, {new G(11, 12, 19, 20), new G(35, 36, 43, 44), new G(59, 60, 67, 68)}, 
 {new G(14, 15, 16, 17), new G(32, 33, 46, 47), new G(62, 63, 64, 64)} };
 
@@ -77,7 +86,7 @@ void setup() {
         FastLED.show();
     }
 
-    // reset board to be empty
+    // reset led board to be empty
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 4; k++) {
@@ -85,9 +94,134 @@ void setup() {
             }
         }
     }
+
+    // reset game to be empty
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            game[i][j] = PIECE_EMPTY;
+    winner = false;
+    who = PIECE_X;
 }
 
+char opposite(char piece) {
+""" Return opposite of PIECE """
 
+    if (piece == PIECE_X) {
+        return PIECE_O;
+    }
+    return PIECE_X;
+}
+
+void place() {
+""" Place WHO at X_POS, Y_POS """
+    if (winner) {
+        return;
+    }
+    if (game[x_pos][y_pos] != PIECE_EMPTY) {
+        return;
+    }
+    game[x_pos][y_pos] = who;
+    for (int i = 0; i < 4; i++) {
+        if (who == PIECE_X) {
+            leds[board[x_pos][y_pos].getG()[i]] = xColor;
+        } else {
+            leds[board[x_pos][y_pos].getG()[i]] = oColor;
+        }
+    }
+
+    if (checkForWin(who)) {
+        winner = true;
+    } else {
+        who = opposite(who);
+    }
+}
+
+bool checkLine(int[] line, char player) {
+""" Check if line is completed by one player """
+    for(int i = 0; i < line.length; i++) {
+        if (line[i] != player) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// might need to debug row, cols
+bool checkForWin(char player) {
+"""Check if there is a win for player."""
+
+    // check row
+    for (int i = 0; i < 3; i++) {
+        if (checkLine(game[i], player)) {
+            return true;
+        }
+    }
+    // check column
+    for (int i = 0; i < 3; i++) {
+        int col[3];
+        for(int j = 0; j < 3; j++) {
+            col[j] = game[j][i]
+        }
+        if (checkLine(col, player)) {
+            return true;
+        }
+    }
+
+    // check diagonal
+    int dia_lr[3] = {game[0][0], game[1][1], game[2][2]};
+    int dia_rl[3] = {game[2][0], game[1][1], game[0][2]};
+    if (checkLine(dia_lr, player)) {
+        return true;
+    }
+    if (checkLine(dia_rl, player)) {
+        return true;
+    }
+    return false;
+}
+
+int getCurrentDirection(){
+    if (digitalRead(UP_PIN) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = min(x_pos-1, 0);
+        }
+    prevTime = currTime;
+    }
+    else if (digitalRead(DOWN_PIN) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = max(y_pos+1, 2);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(LEFT_PIN) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = min(y_pos-1, 0);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(RIGHT_PIN) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = max(y_pos+1, 2);
+        }
+        prevTime = currTime;
+    }
+    
+void blink() {
+    for (int i = 0; i < 4; i++) {
+        digitalWrite(board[x_pos][y_pos].getG()[i], HIGH);
+    }
+    delay(500);
+    for (int i = 0; i < 4; i++) {
+        digitalWrite(board[x_pos][y_pos].getG()[i], LOW);
+    }
+    delay(500);
+}
 void loop() {
+    // blink at x_pos, y_pos
+    blink(); // this might cause issues with input idk
+
 
 }
