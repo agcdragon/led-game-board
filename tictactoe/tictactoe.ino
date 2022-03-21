@@ -41,7 +41,7 @@ const char who;
 // --#--#--
 
 // LED grid mappings 
-int board[3][3] = { {new G(8, 9, 22, 23), new G(38, 39, 40, 41), new G(56, 57, 70, 71)}, {new G(11, 12, 19, 20), new G(35, 36, 43, 44), new G(59, 60, 67, 68)}, 
+G board[3][3] = { {new G(8, 9, 22, 23), new G(38, 39, 40, 41), new G(56, 57, 70, 71)}, {new G(11, 12, 19, 20), new G(35, 36, 43, 44), new G(59, 60, 67, 68)}, 
 {new G(14, 15, 16, 17), new G(32, 33, 46, 47), new G(62, 63, 64, 64)} };
 
 class G {
@@ -179,7 +179,7 @@ bool checkForWin(char player) {
     return false;
 }
 
-int getCurrentDirection(){
+void cursor() {
     if (digitalRead(UP_PIN) == LOW) {
         long unsigned int currTime = millis();
         if (currTime - prevTime > 10) {
@@ -208,20 +208,30 @@ int getCurrentDirection(){
         }
         prevTime = currTime;
     }
+    else if (digitalRead(PLACE_PIN) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            place();
+        }
+        prevTime = currTime;
+    }
+}
     
 void blink() {
     for (int i = 0; i < 4; i++) {
-        digitalWrite(board[x_pos][y_pos].getG()[i], HIGH);
+        leds[board[x_pos][y_pos].getG()[i]] = gColor;
     }
+    FastLED.show();
     delay(500);
     for (int i = 0; i < 4; i++) {
-        digitalWrite(board[x_pos][y_pos].getG()[i], LOW);
+        leds[board[x_pos][y_pos].getG()[i]] = eColor;
     }
+    FastLED.show();
     delay(500);
 }
 void loop() {
     // blink at x_pos, y_pos
-    blink(); // this might cause issues with input idk
-
-
+    cursor();
+    // this might cause issues bc of delay idk
+    blink(); 
 }
