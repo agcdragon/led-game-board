@@ -1,6 +1,6 @@
   //LEDs
   #include <FastLED.h>
-  #define NUM_LEDS    144 
+  #define NUM_LEDS    72
   #define LED_PIN     13
   long unsigned int prevTime = 0;
   int resetDelay = 250;
@@ -43,9 +43,9 @@
   // --#--#--
   
   // LED grid mappings 
-  int board[3][3][4] = { {{8, 9, 22, 23}, {38, 39, 40, 41}, {56, 57, 70, 71}},
+  int board[3][3][4] = { {{14, 15, 16, 17}, {32, 33, 46, 47}, {62, 63, 64, 65}},
                   {{11, 12, 19, 20}, {35, 36, 43, 44}, {59, 60, 67, 68}}, 
-                  {{14, 15, 16, 17}, {32, 33, 46, 47}, {62, 63, 64, 64}} };
+                  {{8, 9, 22, 23}, {38, 39, 40, 41}, {56, 57, 70, 71}} };
   
   CRGB oColor = CRGB(255, 0, 0); // red
   CRGB xColor = CRGB(0, 0, 255); // blue
@@ -57,6 +57,8 @@
       // reset positions
       x_pos = 0;
       y_pos = 0;
+      winner = false;
+      who = PIECE_X;
   
       // setup buttons
       pinMode(UP_PIN, INPUT_PULLUP);
@@ -91,8 +93,6 @@
               game[i][j] = PIECE_EMPTY;
           }
       }
-      winner = false;
-      who = PIECE_X;
   }
   
   char opposite(char piece) {
@@ -106,9 +106,6 @@
   
   void place() {
   // Place WHO at X_POS, Y_POS
-      if (winner) {
-          return;
-      }
       if (game[x_pos][y_pos] != PIECE_EMPTY) {
           return;
       }
@@ -120,12 +117,15 @@
               leds[board[x_pos][y_pos][i]] = oColor;
           }
       }
+      FastLED.show();
   
       if (checkForWin(who)) {
           winner = true;
       } else {
           who = opposite(who);
       }
+
+      return;
   }
   
   bool checkLine(int line[], char player) {
@@ -170,54 +170,73 @@
       }
       return false;
   }
+
+
+  void winnerblink() {
+    //modify to blink only winning squares later
+    if (winner) {
+      for (int i = 8; i < NUM_LEDS; i++) {
+        if (who == PIECE_X) {
+          leds[i] = xColor;
+        }
+        else {
+          leds[i] = oColor;
+        }
+      }
+      FastLED.show();
+    }
+    return;
+  }
+  
   void renderEmptyScreen(){
-    for(int i = 0; i < NUM_LEDS; i++) {
+    for(int i = 8; i < NUM_LEDS; i++) {
       leds[i] = eColor;
     }
   }
   
   void renderSolidScreen() {
-    for(int i = 0; i < NUM_LEDS; i++) {
+    for(int i = 8; i < NUM_LEDS; i++) {
       leds[i] = xColor;
     }
   }
   
   void cursor() {
       if (digitalRead(UP_PIN) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              x_pos = min(x_pos-1, 0);
-          }
-      prevTime = currTime;
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = min(x_pos+1, 2);
+        }
+        prevTime = currTime;
       }
       else if (digitalRead(DOWN_PIN) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              x_pos = max(y_pos+1, 2);
-          }
-          prevTime = currTime;
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = max(x_pos-1, 0);
+        }
+        prevTime = currTime;
       }
       else if (digitalRead(LEFT_PIN) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              y_pos = min(y_pos-1, 0);
-          }
-          prevTime = currTime;
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = max(y_pos-1, 0);
+        }
+        prevTime = currTime;
       }
       else if (digitalRead(RIGHT_PIN) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              y_pos = max(y_pos+1, 2);
-          }
-          prevTime = currTime;
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = min(y_pos+1, 2);
+        }
+        prevTime = currTime;
       }
       else if (digitalRead(PLACE_PIN) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              place();
-          }
-          prevTime = currTime;
-      }
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            place();
+        }
+        prevTime = currTime;
+    }
+    return;
   }
       
   void blink() {
@@ -233,12 +252,18 @@
         FastLED.show();
         delay(100);
       }
+      return;
   }
   
   void loop() {
       if (!winner) {
         // blink at x_pos, y_pos
         cursor();
+        if (winner) {
+          winnerblink();
+          delay(5000);
+          reset();
+        }
         // this might cause issues bc of delay idk
         blink();
       } 
@@ -253,24 +278,6 @@
     x_pos = 0;
     y_pos = 0;
     
-    renderSolidScreen();
-    FastLED.show();
-    delay(resetDelay);
-    renderEmptyScreen();
-    FastLED.show();
-    delay(resetDelay);
-    renderSolidScreen();
-    FastLED.show();
-    delay(resetDelay);
-    renderEmptyScreen();
-    FastLED.show();
-    delay(resetDelay);
-    renderSolidScreen();
-    FastLED.show();
-    delay(resetDelay);
-    renderEmptyScreen();
-    FastLED.show();
-    delay(resetDelay);  
 
     // make grid
     int grid[28] = {10, 13, 18, 21, 24, 25, 26, 27, 28, 29, 30, 31, 34, 37, 42, 45, 48, 49, 50, 51, 52, 53, 54, 55, 58, 61, 66, 69};
