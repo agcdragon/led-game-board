@@ -51,7 +51,7 @@
                              {47, 46, 45, 44, 43, 42, 41, 40},
                              {48, 49, 50, 51, 52, 53, 54, 55},
                              {63, 62, 61, 60, 59, 58, 57, 56},
-                             {64, 65, 66, 67, 68, 69, 70, 71} }
+                             {64, 65, 66, 67, 68, 69, 70, 71} };
 
   int board_side_2[9][8] = { {136, 137, 138, 139, 140, 141, 142, 143},
                              {135, 134, 133, 132, 131, 130, 129, 128},
@@ -61,7 +61,7 @@
                              {103, 102, 101, 100, 99, 98, 97, 96},
                              {88, 89, 90, 91, 92, 93, 94, 95},
                              {87, 86, 85, 84, 83, 82, 81, 80},
-                             {72, 73, 74, 75, 76, 77, 78, 79} }
+                             {72, 73, 74, 75, 76, 77, 78, 79} };
   
   CRGB oColor = CRGB(255, 0, 0); // red
   CRGB xColor = CRGB(0, 0, 255); // blue
@@ -118,12 +118,12 @@
     for (int i = 0; i < 8; i++) {
         if (game[x_pos][i] == PIECE_EMPTY) {
             if (who == PIECE_X) {
-                board_side_1[x_pos][i] = xColor;
-                board_side_2[x_pos][i] = xColor;
+                leds[board_side_1[x_pos][i]] = xColor;
+                leds[board_side_2[x_pos][i]] = xColor;
                 game[x_pos][i] = PIECE_X;
             } else {
-                board_side_1[x_pos][i] = oColor;
-                board_side_2[x_pos][i] = oColor;
+                leds[board_side_1[x_pos][i]] = oColor;
+                leds[board_side_2[x_pos][i]] = oColor;
                 game[x_pos][i] = PIECE_O;
             }
             FastLED.show();
@@ -271,7 +271,7 @@
         leds[board_side_2[x_pos][y_pos]] = gColor;
         FastLED.show();
         delay(500);
-        leds[board_side_2[x_pos][y_pos]] = gColor;
+        leds[board_side_2[x_pos][y_pos]] = eColor;
         FastLED.show();
         delay(100);
       }
@@ -283,7 +283,7 @@
         leds[board_side_1[x_pos][y_pos]] = gColor;
         FastLED.show();
         delay(500);
-        leds[board_side_1[x_pos][y_pos]] = gColor;
+        leds[board_side_1[x_pos][y_pos]] = eColor;
         FastLED.show();
         delay(100);
       }
@@ -295,10 +295,7 @@
         // blink at x_pos, y_pos
         bluecursor();
         redcursor();
-      } 
-      if (digitalRead(RESET_PIN) == LOW) {
-        reset();
-      }   
+      }
   }
 
   void reset() {
