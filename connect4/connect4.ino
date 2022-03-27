@@ -290,6 +290,7 @@
       if (!winner) {
         bluecursor();
         if (winner) {
+            delay(2000);
             winnerblink();
             delay(3000);
             reset();
@@ -297,6 +298,7 @@
         }
         redcursor();
         if (winner) {
+            delay(2000);
             winnerblink();
             delay(3000);
             reset();
