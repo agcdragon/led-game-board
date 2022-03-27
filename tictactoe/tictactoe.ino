@@ -257,14 +257,12 @@
   
   void loop() {
       if (!winner) {
-        // blink at x_pos, y_pos
         cursor();
         if (winner) {
           winnerblink();
-          delay(5000);
+          delay(3000);
           reset();
         }
-        // this might cause issues bc of delay idk
         blink();
       } 
       if (digitalRead(RESET_PIN) == LOW) {

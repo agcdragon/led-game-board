@@ -142,58 +142,54 @@
     }
 
     //add check for win here later
-    who = opposite(who);
+    if (checkForWin(who)) {
+        winner = true;
+    } else {
+        who = opposite(who);
+    }
     return;
   }
   
-  bool checkLine(int line[], char player) {
-  // Check if line is completed by one player
-      for(int i = 0; i < 3; i++) {
-          if (line[i] != player) {
-              return false;
-          }
-      }
-      return true;
-  }
-  
-  // might need to debug row, cols
   bool checkForWin(char player) {
   // Check if there is a win for player.
-  
-      // check row
-      for (int i = 0; i < 3; i++) {
-          if (checkLine(game[i], player)) {
-              return true;
-          }
-      }
-      // check column
-      for (int i = 0; i < 3; i++) {
-          int col[3];
-          for(int j = 0; j < 3; j++) {
-              col[j] = game[j][i];
-          }
-          if (checkLine(col, player)) {
-              return true;
-          }
-      }
-  
-      // check diagonal
-      int dia_lr[3] = {game[0][0], game[1][1], game[2][2]};
-      int dia_rl[3] = {game[2][0], game[1][1], game[0][2]};
-      if (checkLine(dia_lr, player)) {
-          return true;
-      }
-      if (checkLine(dia_rl, player)) {
-          return true;
-      }
-      return false;
+    // horizontalCheck 
+    for (int i = 0; i < 6; i++){
+        for (int j = 0; j < 8; j++){
+            if (game[i][j] == player && game[i][j+1] == player && game[i][j+2] == player && game[i][j+3] == player){
+                return true;
+            }           
+        }
+    }
+    // verticalCheck
+    for (int i = 0; i < 9; i++){
+        for (int j = 0; j < 5; j++){
+            if (game[i][j] == player && game[i+1][j] == player && game[i+2][j] == player && game[i+3][j] == player){
+                return true;
+            }           
+        }
+    }
+    // ascendingDiagonalCheck 
+    for (int i=3; i < 9; i++){
+        for (int j=0; j < 5; j++){
+            if (game[i][j] == player && game[i-1][j+1] == player && game[i-2][j+2] == player && game[i-3][j+3] == player)
+                return true;
+        }
+    }
+    // descendingDiagonalCheck
+    for (int i=3; i < 9; i++){
+        for (int j=3; j < 8; j++){
+            if (game[i][j] == player && game[i-1][j-1] == player && game[i-2][j-2] == player && game[i-3][j-3] == player)
+                return true;
+        }
+    }
+    return false;
   }
 
 
   void winnerblink() {
     //modify to blink only winning squares later
     if (winner) {
-      for (int i = 8; i < NUM_LEDS; i++) {
+      for (int i = 0; i < NUM_LEDS; i++) {
         if (who == PIECE_X) {
           leds[i] = xColor;
         }
@@ -292,9 +288,19 @@
   
   void loop() {
       if (!winner) {
-        // blink at x_pos, y_pos
         bluecursor();
+        if (winner) {
+            winnerblink();
+            delay(3000);
+            reset();
+            bluecursor();
+        }
         redcursor();
+        if (winner) {
+            winnerblink();
+            delay(3000);
+            reset();
+        }
       }
   }
 
