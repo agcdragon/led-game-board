@@ -20,8 +20,8 @@
   #define DIR_RIGHT 3
   
   // Positions
-  int x_pos = 0;
-  int y_pos = 0;
+  int x_pos = 5;
+  int y_pos = 5;
   
   // Gameboard
   const char PIECE_X = 'x';
@@ -69,8 +69,8 @@
   
   void setup() {
       // reset positions
-      x_pos = 0;
-      y_pos = 0;
+      x_pos = 5;
+      y_pos = 5;
       winner = false;
       who = PIECE_X;
       hit1 = 0;
@@ -93,6 +93,7 @@
               leds[board_side_2[i][j]] = waterColor;
           }
       }
+      FastLED.show();
   
       // reset game to be empty
       for (int i = 0; i < 9; i++) {
@@ -391,4 +392,5 @@
         int id = ships[i][2];
         setupcursor(dimx, dimy, id);
       }
+      FastLED.show();
   }
