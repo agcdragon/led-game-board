@@ -20,8 +20,8 @@
   #define DIR_RIGHT 3
   
   // Positions
-  int x_pos = 5;
-  int y_pos = 5;
+  int x_pos = 4;
+  int y_pos = 4;
   
   // Gameboard
   const char PIECE_X = 'x';
@@ -69,8 +69,8 @@
   
   void setup() {
       // reset positions
-      x_pos = 5;
-      y_pos = 5;
+      x_pos = 4;
+      y_pos = 4;
       winner = false;
       who = PIECE_X;
       hit1 = 0;
@@ -109,6 +109,8 @@
         int dimy = ships[i][1];
         int id = ships[i][2];
         setupcursor(dimx, dimy, id);
+        x_pos = 4;
+        y_pos = 4;
       }
 
       // player 2 places ships
@@ -118,7 +120,12 @@
         int dimy = ships[i][1];
         int id = ships[i][2];
         setupcursor(dimx, dimy, id);
+        x_pos = 4;
+        y_pos = 4;
       }
+
+      //switch back to player X
+      who = opposite(who);
   }
   
   char opposite(char piece) {
@@ -135,14 +142,14 @@
     {
       for (int i = x; i < x + dimx; i++) {
         for (int j = y; j < y + dimy; j++) {
-          board_side_1[i][j] = shipColor;
+          leds[board_side_1[i][j]] = shipColor;
           game1[i][j] = id;
         }
       }
     } else {
       for (int i = x; i < x + dimx; i++) {
         for (int j = y; j < y + dimy; j++) {
-          board_side_2[i][j] = shipColor;
+          leds[board_side_2[i][j]] = shipColor;
           game2[i][j] = id;
         }
       }
@@ -156,7 +163,7 @@
     {
       for (int i = x; i < x + dimx; i++) {
         for (int j = y; j < y + dimy; j++) {
-          if ((i < 0 || i >= 9 || j < 0 || j >= 8) || leds[board_side_1[i][j]] != eColor) {
+          if ((i < 0 || i >= 9 || j < 0 || j >= 8) || game1[i][j] != PIECE_EMPTY) {
             return false; 
           }
         }
@@ -165,7 +172,7 @@
     } else {
       for (int i = x; i < x + dimx; i++) {
         for (int j = y; j < y + dimy; j++) {
-          if ((i < 0 || i >= 9 || j < 0 || j >= 8) || leds[board_side_2[i][j]] != eColor) {
+          if ((i < 0 || i >= 9 || j < 0 || j >= 8) || game2[i][j] != PIECE_EMPTY) {
             return false;
           }
         }
@@ -183,31 +190,31 @@
     bool placed = false;
     while (!placed) {
         cursorblink(x, y);
-        if (digitalRead(LEFT) == LOW) {
+        if (digitalRead(LEFT) == LOW && placeable(x, y, x_pos-1, y_pos)) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = max(x_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(RIGHT) == LOW && placeable(x, y, x_pos+1, y_pos)) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = min(x_pos+1, 8);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(DOWN) == LOW && placeable(x, y, x_pos, y_pos-1)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 y_pos = max(y_pos-1, 0);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(RIGHT) == LOW) {
+        else if (digitalRead(UP) == LOW && placeable(x, y, x_pos, y_pos+1)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 8);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(DOWN) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 9);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(UP) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = min(x_pos-1, 0);
+                y_pos = min(y_pos+1, 7);
             }
             prevTime = currTime;
         }
@@ -258,8 +265,8 @@
         FastLED.show();
         delay(100);
       }
-      return;
   }
+  
   bool win() {
     if (hit1 == 10) {
       winner = PIECE_X;
@@ -277,62 +284,66 @@
       if (game2[x][y] > 0) {
         game2[x][y] = game2[x][y] * -1;
         hit1++;
-        board_side_1[x][y] = hitColor;
+        leds[board_side_1[x][y]] = hitColor;
       } else {
-        board_side_1[x][y] = missColor;
+        leds[board_side_1[x][y]] = missColor;
       }
     } else {
-      if (game2[x][y] != 0) {
+      if (game1[x][y] > 0) {
         game1[x][y] = game1[x][y] * -1;
         hit2++;
-        board_side_2[x][y] = hitColor;
+        leds[board_side_2[x][y]] = hitColor;
       } else {
-        board_side_2[x][y] = missColor;
+        leds[board_side_2[x][y]] = missColor;
       }
     }
     FastLED.show();
   }
+  
   void gamecursor() {
+    x_pos = 4;
+    y_pos = 4;
     bool placed = false;
     while (!placed) {
         cursorblink(1, 1);
         if (digitalRead(LEFT) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                y_pos = max(y_pos-1, 0);
+                x_pos = max(x_pos-1, 0);
             }
             prevTime = currTime;
         }
         else if (digitalRead(RIGHT) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 8);
+                x_pos = min(x_pos+1, 8);
             }
             prevTime = currTime;
         }
         else if (digitalRead(DOWN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 9);
+                y_pos = max(y_pos-1, 0);
             }
             prevTime = currTime;
         }
         else if (digitalRead(UP) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                x_pos = min(x_pos-1, 0);
+                y_pos = min(y_pos+1, 7);
             }
             prevTime = currTime;
         }
         else if (digitalRead(PLACE) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-              if (who == PIECE_X && leds[board_side_1[x_pos][y_pos]] == waterColor) {
+//              if (who == PIECE_X && game[x_pos][y_pos] == waterColor) {
+//                fire(x_pos, y_pos);
+//              }
+//              if (who == PIECE_O && leds[board_side_2[x_pos][y_pos]] == waterColor) {
+//                fire(x_pos, y_pos);
+//              }
                 fire(x_pos, y_pos);
-              }
-              if (who == PIECE_O && leds[board_side_2[x_pos][y_pos]] == waterColor) {
-                fire(x_pos, y_pos);
-              }
             }
             winner = win();
             placed = true;
@@ -348,40 +359,43 @@
         gamecursor();
       } else {
         winnerblink();
+        reset();
       }
   }
 
   void reset() {
-    // reset positions
-    x_pos = 0;
-    y_pos = 0;
-    winner = false;
-    who = PIECE_X;
-    hit1 = 0;
-    hit2 = 0;
-    
-    // reset led board to be empty
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 8; j++) {
-            leds[board_side_1[i][j]] = waterColor;
-            leds[board_side_2[i][j]] = waterColor;
-        }
-    }
+      x_pos = 4;
+      y_pos = 4;
+      winner = false;
+      who = PIECE_X;
+      hit1 = 0;
+      hit2 = 0;
+  
+      // reset led board to be water
+      for (int i = 0; i < 9; i++) {
+          for (int j = 0; j < 8; j++) {
+              leds[board_side_1[i][j]] = waterColor;
+              leds[board_side_2[i][j]] = waterColor;
+          }
+      }
+      FastLED.show();
+  
+      // reset game to be empty
+      for (int i = 0; i < 9; i++) {
+          for (int j = 0; j < 8; j++) {
+              game1[i][j] = PIECE_EMPTY;
+              game2[i][j] = PIECE_EMPTY;
+          }
+      }
 
-    // reset game to be empty
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 8; j++) {
-            game1[i][j] = PIECE_EMPTY;
-            game2[i][j] = PIECE_EMPTY;
-        }
-    }
-
-    // player 1 places ships
+      // player 1 places ships
       for (int i = 0; i < NUM_SHIPS; i++) {
         int dimx = ships[i][0];
         int dimy = ships[i][1];
         int id = ships[i][2];
         setupcursor(dimx, dimy, id);
+        x_pos = 4;
+        y_pos = 4;
       }
 
       // player 2 places ships
@@ -391,6 +405,10 @@
         int dimy = ships[i][1];
         int id = ships[i][2];
         setupcursor(dimx, dimy, id);
+        x_pos = 4;
+        y_pos = 4;
       }
-      FastLED.show();
+
+      //switch back to player X
+      who = opposite(who);
   }
