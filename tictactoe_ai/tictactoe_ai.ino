@@ -38,7 +38,7 @@
       if (piece == PIECE_X){
           return -1;
       }
-      return 1; //if piece == PIECE_O
+      return 1; //if piece == PIECE_O, return 
   }
 
   char numToChar(int piece) {
