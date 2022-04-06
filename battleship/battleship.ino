@@ -311,14 +311,14 @@
     if (who == PIECE_X) {
       for (int i = 0; i < 9; i++) { 
         for (int j = 0; j < 8; j++) {
-          if (game2[x][y] == id) {
+          if (game2[i][j] == id) {
             return;
           }
         }
       }
       for (int i = 0; i < 9; i++) { 
         for (int j = 0; j < 8; j++) {
-          if (game2[x][y] == -id) {
+          if (game2[i][j] == -id) {
             leds[board_side_1[i][j]] = deadColor;
           }
         }
@@ -326,14 +326,14 @@
     } else {
       for (int i = 0; i < 9; i++) { 
         for (int j = 0; j < 8; j++) {
-          if (game1[x][y] == id) {
+          if (game1[i][j] == id) {
             return;
           }
         }
       }
       for (int i = 0; i < 9; i++) { 
         for (int j = 0; j < 8; j++) {
-          if (game1[x][y] == -id) {
+          if (game1[i][j] == -id) {
             leds[board_side_2[i][j]] = deadColor;
           }
         }
@@ -345,7 +345,7 @@
   void fire(int x, int y) {
     if (who == PIECE_X) {
       if (game2[x][y] > 0) {
-        int id = game2[x][y]
+        int id = game2[x][y];
         game2[x][y] = game2[x][y] * -1;
         hit1++;
         leds[board_side_1[x][y]] = hitColor;
