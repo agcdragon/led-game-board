@@ -66,6 +66,9 @@
   CRGB deadColor = CRGB(12, 4, 4); // black-ish
   CRGB missColor = CRGB(255, 255, 255); // white
   CRGB eColor = CRGB(0, 0, 0);        // clear/empty
+
+  CRGB winnerColor = CRGB(0, 255, 0); // green
+  CRGB loserColor = CRGB(255, 0, 0); // red
   
   void setup() {
       // reset positions
@@ -124,6 +127,15 @@
         y_pos = 4;
       }
 
+      // reset led board to be water
+      for (int i = 0; i < 9; i++) {
+          for (int j = 0; j < 8; j++) {
+              leds[board_side_1[i][j]] = waterColor;
+              leds[board_side_2[i][j]] = waterColor;
+          }
+      }
+      FastLED.show();
+      
       //switch back to player X
       who = opposite(who);
   }
@@ -183,7 +195,18 @@
 
   void winnerblink() {
     // modify to blink only winning squares later
-    
+    for (int i = 0; i < 9; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (who == PIECE_X) {
+          leds[board_side_1[i][j]] = winnerColor;
+          leds[board_side_2[i][j]] = loserColor;
+        } else {
+          leds[board_side_1[i][j]] = loserColor;
+          leds[board_side_2[i][j]] = winnerColor;          
+        }
+      }
+    }
+    FastLED.show();
   }
   
   void setupcursor(int x, int y, int id) {
@@ -233,40 +256,44 @@
   
   void cursorblink(int dimx, int dimy) {
       // blink for placement of ship
-      if (who == PIECE_X && placeable(dimx, dimy, x_pos, y_pos)) {
+      if (!placeable(dimx, dimy, x_pos, y_pos)) {
+        for(int i = x_pos; i < 9; i++) {
+          for(int j = y_pos; j < 8; j++) {
+            if (placeable(dimx, dimy, i, j)) {
+              x_pos = i;
+              y_pos = j;
+              return;
+            }
+          }
+        }
+      }
+      else {
         for (int i = x_pos; i < x_pos + dimx; i++) {
           for (int j = y_pos; j < y_pos + dimy; j++) {
-            leds[board_side_1[i][j]] = shipColor;
+            if (who == PIECE_X) {
+              leds[board_side_1[i][j]] = shipColor;
+            } else {
+              leds[board_side_2[i][j]] = shipColor;
+            }
           }
         }
         FastLED.show();
         delay(500);
         for (int i = x_pos; i < x_pos + dimx; i++) {
           for (int j = y_pos; j < y_pos + dimy; j++) {
-            leds[board_side_1[i][j]] = waterColor;
+            if (who == PIECE_X) {
+              leds[board_side_1[i][j]] = waterColor;
+            } else {
+              leds[board_side_2[i][j]] = waterColor;
+            }
           }
         }
         FastLED.show();
         delay(100);
-      }
-      if (who == PIECE_O && placeable(dimx, dimy, x_pos, y_pos)) {
-        for (int i = x_pos; i < x_pos + dimx; i++) {
-          for (int j = y_pos; j < y_pos + dimy; j++) {
-            leds[board_side_2[i][j]] = shipColor;
-          }
-        }
-        FastLED.show();
-        delay(500);
-        for (int i = x_pos; i < x_pos + dimx; i++) {
-          for (int j = y_pos; j < y_pos + dimy; j++) {
-            leds[board_side_2[i][j]] = waterColor;
-          }
-        }
-        FastLED.show();
-        delay(100);
-      }
+     }
   }
-  
+
+  // check if there are enough hits for a player to have won
   bool win() {
     if (hit1 == 10) {
       winner = PIECE_X;
@@ -279,21 +306,61 @@
     }
   }
 
+  // check if any ships are sunk, if any are, change that ship's color to dead
+  void checkForSink(int id) {
+    if (who == PIECE_X) {
+      for (int i = 0; i < 9; i++) { 
+        for (int j = 0; j < 8; j++) {
+          if (game2[x][y] == id) {
+            return;
+          }
+        }
+      }
+      for (int i = 0; i < 9; i++) { 
+        for (int j = 0; j < 8; j++) {
+          if (game2[x][y] == -id) {
+            leds[board_side_1[i][j]] = deadColor;
+          }
+        }
+      }
+    } else {
+      for (int i = 0; i < 9; i++) { 
+        for (int j = 0; j < 8; j++) {
+          if (game1[x][y] == id) {
+            return;
+          }
+        }
+      }
+      for (int i = 0; i < 9; i++) { 
+        for (int j = 0; j < 8; j++) {
+          if (game1[x][y] == -id) {
+            leds[board_side_2[i][j]] = deadColor;
+          }
+        }
+      }
+    }
+  }
+
+  // fire at (x, y)
   void fire(int x, int y) {
     if (who == PIECE_X) {
       if (game2[x][y] > 0) {
+        int id = game2[x][y]
         game2[x][y] = game2[x][y] * -1;
         hit1++;
         leds[board_side_1[x][y]] = hitColor;
-      } else {
+        checkForSink(id);
+      } else if (game2[x][y] == 0) {
         leds[board_side_1[x][y]] = missColor;
       }
     } else {
       if (game1[x][y] > 0) {
+        int id = game1[x][y];
         game1[x][y] = game1[x][y] * -1;
         hit2++;
         leds[board_side_2[x][y]] = hitColor;
-      } else {
+        checkForSink(id);
+      } else if (game1[x][y] == 0) {
         leds[board_side_2[x][y]] = missColor;
       }
     }
@@ -337,12 +404,6 @@
         else if (digitalRead(PLACE) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-//              if (who == PIECE_X && game[x_pos][y_pos] == waterColor) {
-//                fire(x_pos, y_pos);
-//              }
-//              if (who == PIECE_O && leds[board_side_2[x_pos][y_pos]] == waterColor) {
-//                fire(x_pos, y_pos);
-//              }
                 fire(x_pos, y_pos);
             }
             winner = win();
@@ -350,7 +411,9 @@
             prevTime = currTime;
         }
     }
-    who = opposite(who);
+    if (!winner) {
+      who = opposite(who);
+    }
     return;
   }
   
@@ -359,6 +422,7 @@
         gamecursor();
       } else {
         winnerblink();
+        delay(10000);
         reset();
       }
   }
@@ -408,6 +472,15 @@
         x_pos = 4;
         y_pos = 4;
       }
+
+      // reset led board to be water
+      for (int i = 0; i < 9; i++) {
+          for (int j = 0; j < 8; j++) {
+              leds[board_side_1[i][j]] = waterColor;
+              leds[board_side_2[i][j]] = waterColor;
+          }
+      }
+      FastLED.show();
 
       //switch back to player X
       who = opposite(who);
