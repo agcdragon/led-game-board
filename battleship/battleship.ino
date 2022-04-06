@@ -256,41 +256,28 @@
   
   void cursorblink(int dimx, int dimy) {
       // blink for placement of ship
-      if (!placeable(dimx, dimy, x_pos, y_pos)) {
-        for(int i = x_pos; i < 9; i++) {
-          for(int j = y_pos; j < 8; j++) {
-            if (placeable(dimx, dimy, i, j)) {
-              x_pos = i;
-              y_pos = j;
-              return;
-            }
+      for (int i = x_pos; i < x_pos + dimx; i++) {
+        for (int j = y_pos; j < y_pos + dimy; j++) {
+          if (who == PIECE_X) {
+            leds[board_side_1[i][j]] = shipColor;
+          } else {
+            leds[board_side_2[i][j]] = shipColor;
           }
         }
       }
-      else {
-        for (int i = x_pos; i < x_pos + dimx; i++) {
-          for (int j = y_pos; j < y_pos + dimy; j++) {
-            if (who == PIECE_X) {
-              leds[board_side_1[i][j]] = shipColor;
-            } else {
-              leds[board_side_2[i][j]] = shipColor;
-            }
+      FastLED.show();
+      delay(500);
+      for (int i = x_pos; i < x_pos + dimx; i++) {
+        for (int j = y_pos; j < y_pos + dimy; j++) {
+          if (who == PIECE_X) {
+            leds[board_side_1[i][j]] = waterColor;
+          } else {
+            leds[board_side_2[i][j]] = waterColor;
           }
         }
-        FastLED.show();
-        delay(500);
-        for (int i = x_pos; i < x_pos + dimx; i++) {
-          for (int j = y_pos; j < y_pos + dimy; j++) {
-            if (who == PIECE_X) {
-              leds[board_side_1[i][j]] = waterColor;
-            } else {
-              leds[board_side_2[i][j]] = waterColor;
-            }
-          }
-        }
-        FastLED.show();
-        delay(100);
-     }
+      }
+      FastLED.show();
+      delay(100);
   }
 
   // check if there are enough hits for a player to have won
