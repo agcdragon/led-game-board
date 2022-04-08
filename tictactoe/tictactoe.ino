@@ -56,6 +56,7 @@
   CRGB wColor = CRGB(255, 255, 255); // white
   CRGB eColor = CRGB(0, 0, 0); // clear/empty
   CRGB gColor = CRGB(0, 255, 0); //green
+  CRGB tieColor = CRGB(255, 215, 0); //gold
   
   void setup() {
       // reset positions
@@ -132,12 +133,26 @@
       if (checkForWin(who)) {
           winner = true;
       } else if (markers == 9) {
-          winner = true;
-          who = PIECE_EMPTY;
+        delay(2000);
+        for (int i = 8; i < 136; i++) {
+          leds[i] = tieColor;
+        }
+        FastLED.show();
+        delay(3000);
+        reset();
+        bluecursor();
       } else {
           who = opposite(who);
       }
-      return;
+      for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+          if(game[i][j] == PIECE_EMPTY) {
+            x_pos = i;
+            y_pos = j; 
+            return;
+          }
+        }
+      }
   }
   
   bool checkLine(int line[], char player) {
@@ -193,8 +208,6 @@
         }
         else if (who == PIECE_O) {
           leds[i] = oColor;
-        } else {
-          leds[i] = wColor;
         }
       }
       for (int i = 72; i < 136; i++) {
@@ -203,8 +216,6 @@
         }
         else if (who == PIECE_O) {
           leds[i] = oColor;
-        } else {
-          leds[i] = wColor;
         }
       }
       FastLED.show();
@@ -219,28 +230,108 @@
         if (digitalRead(UP_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_x = x_pos;
                 x_pos = min(x_pos+1, 2);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && x_pos < 2) {
+                  x_pos = min(x_pos+1, 2);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = prev_x+1; i < 3 && em; i++) {
+                    for(int j = 0; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        x_pos = i;
+                        y_pos = j;
+                        em = false;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  x_pos = prev_x;
+                }
             }
             prevTime = currTime;
         }
         else if (digitalRead(DOWN_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_x = x_pos;
                 x_pos = max(x_pos-1, 0);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && x_pos > 0) {
+                  x_pos = max(x_pos-1, 0);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = prev_x-1; i >= 0 && em; i--) {
+                    for(int j = 0; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
+                        x_pos = i;
+                        y_pos = j;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  x_pos = prev_x;
+                }
             }
             prevTime = currTime;
         }
         else if (digitalRead(LEFT_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_y = y_pos;
                 y_pos = max(y_pos-1, 0);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && y_pos > 0) {
+                  y_pos = max(y_pos-1, 0);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = 0; i < 3; i++) {
+                    for(int j = prev_y-1; j >= 0 && em; j--) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        x_pos = i;
+                        y_pos = j;
+                        em = false;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  y_pos = prev_y;
+                }            
             }
             prevTime = currTime;
         }
         else if (digitalRead(RIGHT_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_y = y_pos;
                 y_pos = min(y_pos+1, 2);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && y_pos < 2) {
+                  y_pos = min(y_pos+1, 2);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = 0; i < 3 && em; i++) {
+                    for(int j = prev_y+1; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
+                        x_pos = i;
+                        y_pos = j;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  y_pos = prev_y;
+                }
             }
             prevTime = currTime;
         }
@@ -263,28 +354,108 @@
         if (digitalRead(UP_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_x = x_pos;
                 x_pos = min(x_pos+1, 2);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && x_pos < 2) {
+                  x_pos = min(x_pos+1, 2);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = prev_x+1; i < 3 && em; i++) {
+                    for(int j = 0; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        x_pos = i;
+                        y_pos = j;
+                        em = false;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  x_pos = prev_x;
+                }
             }
             prevTime = currTime;
         }
         else if (digitalRead(DOWN_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_x = x_pos;
                 x_pos = max(x_pos-1, 0);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && x_pos > 0) {
+                  x_pos = max(x_pos-1, 0);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = prev_x-1; i >= 0 && em; i--) {
+                    for(int j = 0; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
+                        x_pos = i;
+                        y_pos = j;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  x_pos = prev_x;
+                }
             }
             prevTime = currTime;
         }
         else if (digitalRead(LEFT_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_y = y_pos;
                 y_pos = max(y_pos-1, 0);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && y_pos > 0) {
+                  y_pos = max(y_pos-1, 0);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = 0; i < 3; i++) {
+                    for(int j = prev_y-1; j >= 0 && em; j--) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        x_pos = i;
+                        y_pos = j;
+                        em = false;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  y_pos = prev_y;
+                }            
             }
             prevTime = currTime;
         }
         else if (digitalRead(RIGHT_PIN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
+                int prev_y = y_pos;
                 y_pos = min(y_pos+1, 2);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && y_pos < 2) {
+                  y_pos = min(y_pos+1, 2);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = 0; i < 3 && em; i++) {
+                    for(int j = prev_y+1; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
+                        x_pos = i;
+                        y_pos = j;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  y_pos = prev_y;
+                }
             }
             prevTime = currTime;
         }
@@ -353,8 +524,9 @@
   }
 
   void reset() {
-    x_pos = 0;
+      x_pos = 0;
       y_pos = 0;
+      markers = 0;
       winner = false;
       who = PIECE_X;
       
