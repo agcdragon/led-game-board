@@ -208,8 +208,9 @@
     }
     FastLED.show();
   }
-  
+
   void setupcursor(int x, int y, int id) {
+  // the cursor to place ships, blink potential ship placement
     bool placed = false;
     while (!placed) {
         cursorblink(x, y);
@@ -339,6 +340,7 @@
         checkForSink(id);
       } else if (game2[x][y] == 0) {
         leds[board_side_1[x][y]] = missColor;
+        game2[x][y] = -10;
       }
     } else {
       if (game1[x][y] > 0) {
@@ -349,6 +351,7 @@
         checkForSink(id);
       } else if (game1[x][y] == 0) {
         leds[board_side_2[x][y]] = missColor;
+        game1[x][y] = -10;
       }
     }
     FastLED.show();
