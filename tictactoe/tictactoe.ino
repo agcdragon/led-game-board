@@ -29,6 +29,7 @@
   const char PIECE_O = 'o';
   const char PIECE_EMPTY = '-';
   int game[3][3];
+  int markers = 0;
   bool winner;
   char who;
   
@@ -61,6 +62,7 @@
       x_pos = 0;
       y_pos = 0;
       winner = false;
+      markers = 0;
       who = PIECE_X;
   
       // setup buttons
@@ -115,6 +117,7 @@
           return;
       }
       game[x_pos][y_pos] = who;
+      markers += 1;
       for (int i = 0; i < 4; i++) {
           if (who == PIECE_X) {
               leds[board1[x_pos][y_pos][i]] = xColor;
@@ -128,10 +131,12 @@
   
       if (checkForWin(who)) {
           winner = true;
+      } else if (markers == 9) {
+          winner = true;
+          who = PIECE_EMPTY;
       } else {
           who = opposite(who);
       }
-
       return;
   }
   
@@ -186,16 +191,20 @@
         if (who == PIECE_X) {
           leds[i] = xColor;
         }
-        else {
+        else if (who == PIECE_O) {
           leds[i] = oColor;
+        } else {
+          leds[i] = wColor;
         }
       }
       for (int i = 72; i < 136; i++) {
         if (who == PIECE_X) {
           leds[i] = xColor;
         }
-        else {
+        else if (who == PIECE_O) {
           leds[i] = oColor;
+        } else {
+          leds[i] = wColor;
         }
       }
       FastLED.show();
