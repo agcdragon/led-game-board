@@ -33,15 +33,6 @@
   char who;
   
   
-  // --#--#--
-  // --#--#--
-  // ########
-  // --#--#--
-  // --#--#--
-  // ########
-  // --#--#--
-  // --#--#--
-  
   // LED grid mappings 
   int board_side_1[9][8] = { {0, 1, 2, 3, 4, 5, 6, 7},
                              {15, 14, 13, 12, 11, 10, 9, 8},
@@ -203,7 +194,7 @@
   }
   
   void redcursor() {
-    placed = false;
+    bool placed = false;
     //check for ai win possibilities
     for (int i = 0; i < 9; i++) {
         x_pos = i;
@@ -213,9 +204,9 @@
                 y_pos = j;
             }
         }
-        if (j > 0) {
+        if (y_pos > 0) {
             game[i][y_pos] = PIECE_X;
-            if (checkForWin(PIECE_X) {
+            if (checkForWin(PIECE_X)) {
                 game[i][y_pos] = PIECE_EMPTY;
                 place();
                 placed = true;
@@ -234,9 +225,9 @@
                 y_pos = j;
             }
         }
-        if (j > 0) {
+        if (y_pos > 0) {
             game[i][y_pos] = PIECE_O;
-            if (checkForWin(PIECE_O) {
+            if (checkForWin(PIECE_O)) {
                 game[i][y_pos] = PIECE_EMPTY;
                 place();
                 placed = true;
