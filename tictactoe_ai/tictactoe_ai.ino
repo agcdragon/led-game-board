@@ -185,14 +185,15 @@
             memcpy(tmp2, game, 18);
             tmp2[i][j] = who;
             int value = minimax(tmp2, markers+1, opposite(who), true);
-            Serial.write("Value: ");
-            Serial.println(value);
-            Serial.write("Coord: ");
-            Serial.print(i);
-            Serial.write(" ");
-            Serial.println(j);
-            Serial.write("================");
-            Serial.println();
+//            // DEBUGGING
+//            Serial.write("Value: ");
+//            Serial.println(value);
+//            Serial.write("Coord: ");
+//            Serial.print(i);
+//            Serial.write(" ");
+//            Serial.println(j);
+//            Serial.write("================");
+//            Serial.println();
             if (value <= bestMove) {
               bestMove = value;
               bestX = i;
@@ -205,18 +206,13 @@
     x_pos = bestX;
     y_pos = bestY;
     place();
-    Serial.write("================");
-    Serial.println();
-    Serial.write("================");
-    Serial.println();
-  }
-  int minimax(int tmp[3][3], int mark, char player, bool optimizer) {
+//    // DEBUGGING
 //    Serial.write("================");
 //    Serial.println();
-//    Serial.write("Player: ");
-//    Serial.println(player);
-//    Serial.write("Marker: ");
-//    Serial.println(mark);
+//    Serial.write("================");
+//    Serial.println();
+  }
+  int minimax(int tmp[3][3], int mark, char player, bool optimizer) {
     if (checkForWin(opposite(player), tmp)) {
       if (player == PIECE_X) {
         return -1;
