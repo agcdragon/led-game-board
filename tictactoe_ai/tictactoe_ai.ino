@@ -1,7 +1,6 @@
   //LEDs
   #include <FastLED.h>
-  #include <string.h>
-  #define NUM_LEDS    72
+  #define NUM_LEDS    144
   #define LED_PIN     13
   long unsigned int prevTime = 0;
   int resetDelay = 250;
@@ -30,23 +29,10 @@
   const char PIECE_O = 'o';
   const char PIECE_EMPTY = '-';
   int game[3][3];
+  int markers = 0;
   bool winner;
   char who;
-  
 
-  int charToNum(char piece) {
-      if (piece == PIECE_X){
-          return -1;
-      }
-      return 1; //if piece == PIECE_O, return 
-  }
-
-  char numToChar(int piece) {
-      if (piece == -1){
-          return PIECE_X;
-      }
-      return PIECE_O; //if piece == 1
-  }
   
   // --#--#--
   // --#--#--
@@ -58,25 +44,28 @@
   // --#--#--
   
   // LED grid mappings 
-  int board[3][3][4] = { {{14, 15, 16, 17}, {32, 33, 46, 47}, {62, 63, 64, 65}},
+  int board1[3][3][4] = { {{14, 15, 16, 17}, {32, 33, 46, 47}, {62, 63, 64, 65}},
                   {{11, 12, 19, 20}, {35, 36, 43, 44}, {59, 60, 67, 68}}, 
                   {{8, 9, 22, 23}, {38, 39, 40, 41}, {56, 57, 70, 71}} };
+  int board2[3][3][4] = { {{134, 135, 121, 120}, {104, 105, 102, 103}, {86, 87, 73, 72}},
+                          {{131, 132, 124, 123}, {107, 108, 99, 100}, {83, 84, 75, 76}},
+                          {{128, 129, 126, 127}, {111, 110, 96, 97}, {80, 81, 79, 78}} };
   
   CRGB oColor = CRGB(255, 0, 0); // red
   CRGB xColor = CRGB(0, 0, 255); // blue
   CRGB wColor = CRGB(255, 255, 255); // white
   CRGB eColor = CRGB(0, 0, 0); // clear/empty
   CRGB gColor = CRGB(0, 255, 0); //green
-  
+  CRGB tieColor = CRGB(255, 215, 0); //gold
+
   void setup() {
-      Serial.begin(9600);
-      Serial.write(4500);
       // reset positions
       x_pos = 0;
       y_pos = 0;
       winner = false;
+      markers = 0;
       who = PIECE_X;
-  
+      Serial.begin(9600);
       // setup buttons
       pinMode(UP_PIN, INPUT_PULLUP);
       pinMode(DOWN_PIN, INPUT_PULLUP);
@@ -89,8 +78,9 @@
       FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
       
       // setup grid lines 
-      int grid[28] = {10, 13, 18, 21, 24, 25, 26, 27, 28, 29, 30, 31, 34, 37, 42, 45, 48, 49, 50, 51, 52, 53, 54, 55, 58, 61, 66, 69};
-      for (int i = 0; i < 28; i++) {
+      int grid[56] = {10, 13, 18, 21, 24, 25, 26, 27, 28, 29, 30, 31, 34, 37, 42, 45, 48, 49, 50, 51, 52, 53, 54, 55, 58, 61, 66, 69, 130, 125, 109, 98, 82,
+                       77, 133, 122, 106, 101, 90, 85, 74, 112, 113, 114, 115, 116, 117, 118, 119, 95, 94, 93, 92, 91, 89, 88};
+      for (int i = 0; i < 56; i++) {
           leds[grid[i]] = wColor;
           FastLED.show();
       }
@@ -99,7 +89,8 @@
       for (int i = 0; i < 3; i++) {
           for (int j = 0; j < 3; j++) {
               for (int k = 0; k < 4; k++) {
-                  leds[board[i][j][k]] = eColor;
+                  leds[board1[i][j][k]] = eColor;
+                  leds[board2[i][j][k]] = eColor;
               }
           }
       }
@@ -123,28 +114,147 @@
   
   void place() {
   // Place WHO at X_POS, Y_POS
-      Serial.print(x_pos);
-      Serial.print(y_pos);
       if (game[x_pos][y_pos] != PIECE_EMPTY) {
           return;
       }
       game[x_pos][y_pos] = who;
+      markers += 1;
       for (int i = 0; i < 4; i++) {
           if (who == PIECE_X) {
-              leds[board[x_pos][y_pos][i]] = xColor;
+              leds[board1[x_pos][y_pos][i]] = xColor;
+              leds[board2[x_pos][y_pos][i]] = xColor;
           } else {
-              leds[board[x_pos][y_pos][i]] = oColor;
+              leds[board1[x_pos][y_pos][i]] = oColor;
+              leds[board2[x_pos][y_pos][i]] = oColor;
           }
       }
       FastLED.show();
-  
-      if (checkForWin(game, who)) {
+
+      if (checkForWin(who, game)) { // win
           winner = true;
-      } else {
+      } else if (markers == 9) { // tie
+        delay(2000);
+        for (int i = 8; i < 136; i++) {
+          leds[i] = tieColor;
+        }
+        FastLED.show();
+        delay(3000);
+        reset();
+        bluecursor();
+      } else { // keep playing
           who = opposite(who);
       }
 
-      return;
+      // switch cursor to available spot
+      for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+          if(game[i][j] == PIECE_EMPTY) {
+            x_pos = i;
+            y_pos = j; 
+            return;
+          }
+        }
+      }
+  }
+  void findBestMove() {
+    int bestX = -1;
+    int bestY = -1;
+    if (who == PIECE_X) {
+      int bestMove = -2;
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (game[i][j] == PIECE_EMPTY){
+            int tmp2[3][3];
+            memcpy(tmp2, game, 18);
+            tmp2[i][j] = who;
+            int value = minimax(tmp2, markers+1, opposite(who), false);
+            if (value >= bestMove) {
+              bestMove = value;
+              bestX = i;
+              bestY = j;
+            }
+          }
+        }
+      }
+    } else {
+      int bestMove = 2;
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (game[i][j] == PIECE_EMPTY){
+            int tmp2[3][3];
+            memcpy(tmp2, game, 18);
+            tmp2[i][j] = who;
+            int value = minimax(tmp2, markers+1, opposite(who), true);
+            Serial.write("Value: ");
+            Serial.println(value);
+            Serial.write("Coord: ");
+            Serial.print(i);
+            Serial.write(" ");
+            Serial.println(j);
+            Serial.write("================");
+            Serial.println();
+            if (value <= bestMove) {
+              bestMove = value;
+              bestX = i;
+              bestY = j;
+            }
+          }
+        }
+      }
+    }
+    x_pos = bestX;
+    y_pos = bestY;
+    place();
+    Serial.write("================");
+    Serial.println();
+    Serial.write("================");
+    Serial.println();
+  }
+  int minimax(int tmp[3][3], int mark, char player, bool optimizer) {
+//    Serial.write("================");
+//    Serial.println();
+//    Serial.write("Player: ");
+//    Serial.println(player);
+//    Serial.write("Marker: ");
+//    Serial.println(mark);
+    if (checkForWin(opposite(player), tmp)) {
+      if (player == PIECE_X) {
+        return -1;
+      } else {
+        return 1;
+      }
+    } else if (mark == 9) {
+      return 0;
+    }
+    if (optimizer) {
+      int bestVal = -2;
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (tmp[i][j] == PIECE_EMPTY) {
+            int tmp2[3][3];
+            memcpy(tmp2, tmp, 18);
+            tmp2[i][j] = player;
+            int value = minimax(tmp2, mark+1, opposite(player), !optimizer);
+            bestVal = max(bestVal, value);
+          }
+        }
+      }
+      return bestVal;
+    } else {
+      int bestVal = 2;
+      for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (tmp[i][j] == PIECE_EMPTY) {
+            int tmp2[3][3];
+            memcpy(tmp2, tmp, 18);
+            tmp2[i][j] = player;
+            int value = minimax(tmp2, mark+1, opposite(player), !optimizer);
+            bestVal = min(bestVal, value);
+          }
+        }
+      }
+      return bestVal;
+    }
   }
   
   bool checkLine(int line[], char player) {
@@ -158,195 +268,33 @@
   }
   
   // might need to debug row, cols
-  // might need to debug row, cols
-  bool checkForWin(int temp_board[3][3], char player) {
+  bool checkForWin(char player, int tmp[3][3]) {
   // Check if there is a win for player.
   
       // check row
-      for (int i = 0; i < 3; i++) {
-          if (checkLine(temp_board[i], player)) {
-              return true;
-          }
+      int row1[3] = {tmp[0][0], tmp[0][1], tmp[0][2]};
+      int row2[3] = {tmp[1][0], tmp[1][1], tmp[1][2]};
+      int row3[3] = {tmp[2][0], tmp[2][1], tmp[2][2]};
+      if (checkLine(row1, player) || checkLine(row2, player) || checkLine(row3, player)) {
+          return true;
       }
-      // check column
-      for (int i = 0; i < 3; i++) {
-          int col[3];
-          for(int j = 0; j < 3; j++) {
-              col[j] = temp_board[j][i];
-          }
-          if (checkLine(col, player)) {
-              return true;
-          }
+      
+      int col1[3] = {tmp[0][0], tmp[1][0], tmp[2][0]};
+      int col2[3] = {tmp[0][1], tmp[1][1], tmp[2][1]};
+      int col3[3] = {tmp[0][2], tmp[1][2], tmp[2][2]};
+      if (checkLine(col1, player) || checkLine(col2, player) || checkLine(col3, player)) {
+          return true;
       }
   
       // check diagonal
-      int dia_lr[3] = {temp_board[0][0], temp_board[1][1], temp_board[2][2]};
-      int dia_rl[3] = {temp_board[2][0], temp_board[1][1], temp_board[0][2]};
-      if (checkLine(dia_lr, player)) {
-          return true;
-      }
-      if (checkLine(dia_rl, player)) {
+      int dia_lr[3] = {tmp[0][0], tmp[1][1], tmp[2][2]};
+      int dia_rl[3] = {tmp[2][0], tmp[1][1], tmp[0][2]};
+      if (checkLine(dia_lr, player) || checkLine(dia_rl, player)) {
           return true;
       }
       return false;
   }
 
-
-  void bluecursor() { //person playing 1st
-      bool placed = false;
-      Serial.write("bluecursor");
-      while (!placed) {
-        blueblink();
-        if (digitalRead(UP_PIN) == LOW) {
-            Serial.write("up");
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 2);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(DOWN_PIN) == LOW) {
-            Serial.write("down");
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = max(x_pos-1, 0);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(LEFT_PIN) == LOW) {
-            Serial.write("left");
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = max(y_pos-1, 0);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(RIGHT_PIN) == LOW) {
-            Serial.write("right");
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 2);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(PLACE_PIN) == LOW) {
-            
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                placed = true;
-                Serial.write("place");
-                place();
-            }
-            prevTime = currTime;
-        }
-    }
-    return;
-  }
-
-
-
-  void redcursor() { //ai playing 2nd
-    
-    int best_i = -1;
-    int best_j = -1;
-    int score = -2;
-    int gamecopy[3][3];
-    
-    for(int i = 0; i < 3; i++) {//For all moves,
-        for(int j = 0; j < 3; j++) {//For all moves,
-            if(game[i][j] == PIECE_EMPTY) {
-                for (int k = 0; k < 3; k++) {
-                  for (int l = 0; l < 3; l++) {
-                    gamecopy[k][l] = game[k][l];
-                  }
-                }
-                gamecopy[i][j] = PIECE_O;
-                int tempScore = -minimax(gamecopy, PIECE_X);
-                if(tempScore > score) {
-                    score = tempScore;
-                    best_i = i;
-                    best_j = j;
-                }
-            }
-        }
-    }
-    //returns a score based on minimax tree at a given node.
-    x_pos = best_i;
-    y_pos = best_j;
-    Serial.write("x");
-    Serial.println(x_pos);
-    Serial.write("y");
-    Serial.println(y_pos);
-    place();
-
-    return;
-  }
-
-  //minimax function
-  int minimax(int tempboard[3][3], char player) {
-    //How is the position like for player (their turn) on board?
-    bool winner = checkForWin(tempboard, player);
-    if(winner) { //if someone won
-        if (player == PIECE_X){ //if person won
-            return -1;
-        } else { //if player is piece_o (if ai won)
-            return 1;
-        }
-    }
-
-    int move = -1;
-    int score = -2;//Losing moves are preferred to no move
-    for(int i = 0; i < 3; i++) {//For all moves,
-        for(int j = 0; j < 3; j++) {//For all moves,
-            if(tempboard[i][j] == PIECE_EMPTY) {//If legal,
-                tempboard[i][j] = player;//Try the move
-                int thisScore = -minimax(tempboard, opposite(player));
-                if(thisScore > score) {
-                    score = thisScore;
-                    move = i;
-                }//Pick the one thats worst for the opponent
-                tempboard[i][j] = PIECE_EMPTY;//Reset board after try
-            }
-        }
-    }
-    if(move == -1) return 0;
-    return score;
-  } 
-
-
-  void redblink() {
-      if (game[x_pos][y_pos] == PIECE_EMPTY) {
-        for (int i = 0; i < 4; i++) {
-            leds[board[x_pos][y_pos][i]] = gColor;
-        }
-        FastLED.show();
-        delay(500);
-        for (int i = 0; i < 4; i++) {
-            leds[board[x_pos][y_pos][i]] = eColor;
-        }
-        FastLED.show();
-        delay(100);
-      }
-      return;
-  }
-
-  
-
-  void blueblink() {
-      if (game[x_pos][y_pos] == PIECE_EMPTY) {
-        for (int i = 0; i < 4; i++) {
-            leds[board[x_pos][y_pos][i]] = gColor;
-        }
-        FastLED.show();
-        delay(500);
-        for (int i = 0; i < 4; i++) {
-            leds[board[x_pos][y_pos][i]] = eColor;
-        }
-        FastLED.show();
-        delay(100);
-      }
-      return;
-  }
 
   void winnerblink() {
     //modify to blink only winning squares later
@@ -355,7 +303,15 @@
         if (who == PIECE_X) {
           leds[i] = xColor;
         }
-        else {
+        else if (who == PIECE_O) {
+          leds[i] = oColor;
+        }
+      }
+      for (int i = 72; i < 136; i++) {
+        if (who == PIECE_X) {
+          leds[i] = xColor;
+        }
+        else if (who == PIECE_O) {
           leds[i] = oColor;
         }
       }
@@ -364,9 +320,171 @@
     return;
   }
   
+  void redcursor() {
+      findBestMove();
+      delay(1000);
+  }
+
+  void bluecursor() {
+      //findBestMove();
+      //delay(1000);
+      bool placed = false;
+      while (!placed) {
+        blueblink();
+        if (digitalRead(UP_PIN) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                int prev_x = x_pos;
+                x_pos = min(x_pos+1, 2);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && x_pos < 2) {
+                  x_pos = min(x_pos+1, 2);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = prev_x+1; i < 3 && em; i++) {
+                    for(int j = 0; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        x_pos = i;
+                        y_pos = j;
+                        em = false;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  x_pos = prev_x;
+                }
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(DOWN_PIN) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                int prev_x = x_pos;
+                x_pos = max(x_pos-1, 0);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && x_pos > 0) {
+                  x_pos = max(x_pos-1, 0);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = prev_x-1; i >= 0 && em; i--) {
+                    for(int j = 0; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
+                        x_pos = i;
+                        y_pos = j;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  x_pos = prev_x;
+                }
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(LEFT_PIN) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                int prev_y = y_pos;
+                y_pos = max(y_pos-1, 0);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && y_pos > 0) {
+                  y_pos = max(y_pos-1, 0);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = 0; i < 3; i++) {
+                    for(int j = prev_y-1; j >= 0 && em; j--) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        x_pos = i;
+                        y_pos = j;
+                        em = false;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  y_pos = prev_y;
+                }            
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(RIGHT_PIN) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                int prev_y = y_pos;
+                y_pos = min(y_pos+1, 2);
+                while(game[x_pos][y_pos] != PIECE_EMPTY && y_pos < 2) {
+                  y_pos = min(y_pos+1, 2);
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
+                  for(int i = 0; i < 3 && em; i++) {
+                    for(int j = prev_y+1; j < 3; j++) {
+                      if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
+                        x_pos = i;
+                        y_pos = j;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  y_pos = prev_y;
+                }
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(PLACE_PIN) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                placed = true;
+                place();
+            }
+            prevTime = currTime;
+        }
+    }
+    return;
+  }
+
+  void redblink() {
+      if (game[x_pos][y_pos] == PIECE_EMPTY) {
+        for (int i = 0; i < 4; i++) {
+            leds[board2[x_pos][y_pos][i]] = gColor;
+        }
+        FastLED.show();
+        delay(500);
+        for (int i = 0; i < 4; i++) {
+            leds[board2[x_pos][y_pos][i]] = eColor;
+        }
+        FastLED.show();
+        delay(100);
+      }
+      return;
+  }
+
+  void blueblink() {
+      if (game[x_pos][y_pos] == PIECE_EMPTY) {
+        for (int i = 0; i < 4; i++) {
+            leds[board1[x_pos][y_pos][i]] = gColor;
+        }
+        FastLED.show();
+        delay(500);
+        for (int i = 0; i < 4; i++) {
+            leds[board1[x_pos][y_pos][i]] = eColor;
+        }
+        FastLED.show();
+        delay(100);
+      }
+      return;
+  }
+  
   void loop() {
       if (!winner) {
-        Serial.write("blue");
         bluecursor();
         if (winner) {
             delay(2000);
@@ -375,40 +493,40 @@
             reset();
             bluecursor();
         }
-        Serial.write("red");
         redcursor();
-        //place();
         if (winner) {
             delay(2000);
             winnerblink();
             delay(3000);
             reset();
+            bluecursor();
         }
       }   
   }
 
   void reset() {
-    x_pos = 0;
+      x_pos = 0;
       y_pos = 0;
+      markers = 0;
       winner = false;
       who = PIECE_X;
-      
       // setup grid lines 
-      int grid[28] = {10, 13, 18, 21, 24, 25, 26, 27, 28, 29, 30, 31, 34, 37, 42, 45, 48, 49, 50, 51, 52, 53, 54, 55, 58, 61, 66, 69};
-
-      for (int i = 0; i < 28; i++) {
+      int grid[56] = {10, 13, 18, 21, 24, 25, 26, 27, 28, 29, 30, 31, 34, 37, 42, 45, 48, 49, 50, 51, 52, 53, 54, 55, 58, 61, 66, 69, 130, 125, 109, 98, 82,
+                       77, 133, 122, 106, 101, 90, 85, 74, 112, 113, 114, 115, 116, 117, 118, 119, 95, 94, 93, 92, 91, 89, 88};
+      for (int i = 0; i < 56; i++) {
           leds[grid[i]] = wColor;
-          FastLED.show();
       }
   
       // reset led board to be empty
       for (int i = 0; i < 3; i++) {
           for (int j = 0; j < 3; j++) {
               for (int k = 0; k < 4; k++) {
-                  leds[board[i][j][k]] = eColor;
+                  leds[board1[i][j][k]] = eColor;
+                  leds[board2[i][j][k]] = eColor;
               }
           }
       }
+      FastLED.show();
   
       // reset game to be empty
       for (int i = 0; i < 3; i++) {
