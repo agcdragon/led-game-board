@@ -196,50 +196,61 @@
   void redcursor() {
     bool placed = false;
     //check for ai win possibilities
-    for (int i = 0; i < 9; i++) {
-        x_pos = i;
-        int y_pos = -1;
-        for (int j = 0; j < 8; j++) {
-            if (j == PIECE_EMPTY) {
-                y_pos = j;
-            }
-        }
-        if (y_pos > 0) {
-            game[i][y_pos] = PIECE_X;
-            if (checkForWin(PIECE_X)) {
-                game[i][y_pos] = PIECE_EMPTY;
-                place();
-                placed = true;
-            }
-        }
-        if (placed = true) {
-            break;
-        }
-    }
-    //check for other player win possibilities to block
-    for (int i = 0; i < 9; i++) {
-        x_pos = i;
-        int y_pos = -1;
-        for (int j = 0; j < 8; j++) {
-            if (j == PIECE_EMPTY) {
-                y_pos = j;
-            }
-        }
-        if (y_pos > 0) {
-            game[i][y_pos] = PIECE_O;
-            if (checkForWin(PIECE_O)) {
-                game[i][y_pos] = PIECE_EMPTY;
-                place();
-                placed = true;
-            }
-        }
-        if (placed = true) {
-            break;
-        }
-    //place based on an evaluation algorithm of the board, ex. number of ai squares in the area
-    }
+//    for (int i = 0; i < 9; i++) {
+//        x_pos = i;
+//        int y_pos = -1;
+//        for (int j = 0; j < 8; j++) {
+//            if (game[i][j] == PIECE_EMPTY) {
+//                y_pos = j;
+//            }
+//        }
+//        if (y_pos > 0) {
+//            game[i][y_pos] = PIECE_X;
+//            if (checkForWin(PIECE_X)) {
+//                game[i][y_pos] = PIECE_EMPTY;
+//                place();
+//                placed = true;
+//            }
+//        }
+//        if (placed = true) {
+//            break;
+//        }
+//    }
+//    //check for other player win possibilities to block
+//    for (int i = 0; i < 9; i++) {
+//        x_pos = i;
+//        int y_pos = -1;
+//        for (int j = 0; j < 8; j++) {
+//            if (game[i][j] == PIECE_EMPTY) {
+//                y_pos = j;
+//            }
+//        }
+//        if (y_pos > 0) {
+//            game[i][y_pos] = PIECE_O;
+//            if (checkForWin(PIECE_O)) {
+//                game[i][y_pos] = PIECE_EMPTY;
+//                place();
+//                placed = true;
+//            }
+//        }
+//        if (placed = true) {
+//            break;
+//        }
+//    //place based on an evaluation algorithm of the board, ex. number of ai squares in the area
+//    }
     if (!placed) {
-
+        for (int i = 0; i < 9; i++) {
+          for (int j = 0; j < 8; j++) {
+            if (!placed && game[i][j] == PIECE_EMPTY) {
+                x_pos = i;
+                y_pos = j;
+                placed = true;
+                place();
+                break;
+            }
+          }
+        }
+        
     }
   }
 
