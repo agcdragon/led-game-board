@@ -133,17 +133,26 @@
       if (checkForWin(who)) {
           winner = true;
       } else if (markers == 9) {
+        delay(2000);
         for (int i = 8; i < 136; i++) {
           leds[i] = tieColor;
         }
         FastLED.show();
-        delay(5000);
+        delay(3000);
         reset();
         bluecursor();
       } else {
           who = opposite(who);
       }
-      return;
+      for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+          if(game[i][j] == PIECE_EMPTY) {
+            x_pos = i;
+            y_pos = j; 
+            return;
+          }
+        }
+      }
   }
   
   bool checkLine(int line[], char player) {
@@ -217,7 +226,6 @@
   void redcursor() {
       bool placed = false;
       while (!placed) {
-        Serial.print(x_pos + " " + y_pos);
         redblink();
         if (digitalRead(UP_PIN) == LOW) {
             long unsigned int currTime = millis();
@@ -228,13 +236,14 @@
                   x_pos = min(x_pos+1, 2);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
-                  for(int i = prev_x+1; i < 3; i++) {
+                  bool em = true;
+                  for(int i = prev_x+1; i < 3 && em; i++) {
                     for(int j = 0; j < 3; j++) {
                       if (game[i][j] == PIECE_EMPTY) {
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        em = false;
+                        break;
                       }
                     }
                   }
@@ -254,13 +263,14 @@
                   x_pos = max(x_pos-1, 0);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
-                  for(int i = prev_x-1; i >= 0; i--) {
+                  bool em = true;
+                  for(int i = prev_x-1; i >= 0 && em; i--) {
                     for(int j = 0; j < 3; j++) {
                       if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        break;
                       }
                     }
                   }
@@ -280,13 +290,14 @@
                   y_pos = max(y_pos-1, 0);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
                   for(int i = 0; i < 3; i++) {
-                    for(int j = y_pos; j >= 0; j--) {
+                    for(int j = prev_y-1; j >= 0 && em; j--) {
                       if (game[i][j] == PIECE_EMPTY) {
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        em = false;
+                        break;
                       }
                     }
                   }
@@ -306,13 +317,14 @@
                   y_pos = min(y_pos+1, 2);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
-                  for(int i = 0; i < 3; i++) {
-                    for(int j = y_pos; j < 2; j++) {
+                  bool em = true;
+                  for(int i = 0; i < 3 && em; i++) {
+                    for(int j = prev_y+1; j < 3; j++) {
                       if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        break;
                       }
                     }
                   }
@@ -338,7 +350,6 @@
   void bluecursor() {
       bool placed = false;
       while (!placed) {
-        Serial.print(x_pos + " " + y_pos);
         blueblink();
         if (digitalRead(UP_PIN) == LOW) {
             long unsigned int currTime = millis();
@@ -349,13 +360,14 @@
                   x_pos = min(x_pos+1, 2);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
-                  for(int i = prev_x+1; i < 3; i++) {
+                  bool em = true;
+                  for(int i = prev_x+1; i < 3 && em; i++) {
                     for(int j = 0; j < 3; j++) {
                       if (game[i][j] == PIECE_EMPTY) {
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        em = false;
+                        break;
                       }
                     }
                   }
@@ -375,13 +387,14 @@
                   x_pos = max(x_pos-1, 0);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
-                  for(int i = prev_x-1; i >= 0; i--) {
+                  bool em = true;
+                  for(int i = prev_x-1; i >= 0 && em; i--) {
                     for(int j = 0; j < 3; j++) {
                       if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        break;
                       }
                     }
                   }
@@ -401,13 +414,14 @@
                   y_pos = max(y_pos-1, 0);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
+                  bool em = true;
                   for(int i = 0; i < 3; i++) {
-                    for(int j = y_pos; j >= 0; j--) {
+                    for(int j = prev_y-1; j >= 0 && em; j--) {
                       if (game[i][j] == PIECE_EMPTY) {
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        em = false;
+                        break;
                       }
                     }
                   }
@@ -427,13 +441,14 @@
                   y_pos = min(y_pos+1, 2);
                 }
                 if (game[x_pos][y_pos] != PIECE_EMPTY) {
-                  for(int i = 0; i < 3; i++) {
-                    for(int j = y_pos; j < 2; j++) {
+                  bool em = true;
+                  for(int i = 0; i < 3 && em; i++) {
+                    for(int j = prev_y+1; j < 3; j++) {
                       if (game[i][j] == PIECE_EMPTY) {
+                        em = false;
                         x_pos = i;
                         y_pos = j;
-                        prevTime = currTime;
-                        return;
+                        break;
                       }
                     }
                   }
@@ -509,8 +524,9 @@
   }
 
   void reset() {
-    x_pos = 0;
+      x_pos = 0;
       y_pos = 0;
+      markers = 0;
       winner = false;
       who = PIECE_X;
       
