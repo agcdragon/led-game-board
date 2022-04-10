@@ -214,35 +214,35 @@
     bool placed = false;
     while (!placed) {
         cursorblink(x, y);
-        if (digitalRead(LEFT) == LOW && placeable(x, y, x_pos-1, y_pos)) {
+        if (digitalRead(LEFT) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 x_pos = max(x_pos-1, 0);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(RIGHT) == LOW && placeable(x, y, x_pos+1, y_pos)) {
+        else if (digitalRead(RIGHT) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 x_pos = min(x_pos+1, 8);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(DOWN) == LOW && placeable(x, y, x_pos, y_pos-1)) {
+        else if (digitalRead(DOWN) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 y_pos = max(y_pos-1, 0);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(UP) == LOW && placeable(x, y, x_pos, y_pos+1)) {
+        else if (digitalRead(UP) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 y_pos = min(y_pos+1, 7);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(PLACE) == LOW) {
+        else if (digitalRead(PLACE) == LOW && placeable(x, y, x_pos, y_pos+1)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 place(x, y, x_pos, y_pos, id);
@@ -256,12 +256,15 @@
 
   
   void cursorblink(int dimx, int dimy) {
+      CRGB tmp[dimx][dimy];
       // blink for placement of ship
       for (int i = x_pos; i < x_pos + dimx; i++) {
         for (int j = y_pos; j < y_pos + dimy; j++) {
           if (who == PIECE_X) {
+            tmp[i-x_pos][j-y_pos] = leds[board_side_1[i][j]];
             leds[board_side_1[i][j]] = shipColor;
           } else {
+            tmp[i-x_pos][j-y_pos] = leds[board_side_2[i][j]];
             leds[board_side_2[i][j]] = shipColor;
           }
         }
@@ -271,9 +274,9 @@
       for (int i = x_pos; i < x_pos + dimx; i++) {
         for (int j = y_pos; j < y_pos + dimy; j++) {
           if (who == PIECE_X) {
-            leds[board_side_1[i][j]] = waterColor;
+            leds[board_side_1[i][j]] = tmp[i-x_pos][j-y_pos];
           } else {
-            leds[board_side_2[i][j]] = waterColor;
+            leds[board_side_2[i][j]] = tmp[i-x_pos][j-y_pos];
           }
         }
       }
