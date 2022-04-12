@@ -29,6 +29,8 @@ def ttt():
 def connect4():
     global GAME, w, h
     GAME = "connect4"
+    for widget in win.winfo_children():
+        widget.destroy()
     frame = Frame(win)
     frame.pack()
     Button(frame, text="PvP", font=(f), width=w, height=h, command=id).grid(row=0, column=0)
@@ -38,6 +40,8 @@ def connect4():
 def battle():
     global GAME, w, h
     GAME = "battleship"
+    for widget in win.winfo_children():
+        widget.destroy()
     frame = Frame(win)
     frame.pack()
     Button(frame, text="PvP", font=(f), width=w, height=h, command=id).grid(row=0, column=0)
@@ -46,7 +50,10 @@ def battle():
 
 def snake():
     global GAME, w, h
+    for widget in win.winfo_children():
+        widget.destroy()
     GAME = "snake"
+    start()
 
 def reset():
     global GAME, w, h
