@@ -1,3 +1,9 @@
+// python-build-start
+// /opt/arduino-1.8.19/arduino
+// arduino:avr:uno
+// /dev/ttyACM0
+// python-build-end
+
 //LEDs
 #include <FastLED.h>
 #include <LinkedList.h>

@@ -52,7 +52,7 @@
   unsigned int NUM_ROW = 9; // how tall
   unsigned int PLAYER = 1; // player number
   unsigned int COMPUTER = 2; // AI number
-  unsigned int MAX_DEPTH = 5; // the default "difficulty" of the computer controlled AI
+  unsigned int MAX_DEPTH = 2; // the default "difficulty" of the computer controlled AI
   
   bool gameOver = false; // flag for if game is over
   unsigned int turns = 0; // count for # turns
@@ -97,6 +97,16 @@
       // reset positions
       x_pos = 0;
       y_pos = 7;
+
+      Serial.begin(9600);
+      Serial.begin(9600);
+//            Serial.println(value);
+//            Serial.write("Coord: ");
+//            Serial.print(i);
+//            Serial.write(" ");
+//            Serial.println(j);
+//            Serial.write("================");
+//            Serial.println();
   
       // setup buttons
       pinMode(LEFT1, INPUT_PULLUP);
@@ -188,6 +198,10 @@
         break;
       }
     }
+    if (p == COMPUTER) {
+      place(c);
+    }
+    
   }
 
   /**
@@ -220,11 +234,13 @@
      * as well, we need to take into consideration how many moves
      * ie when the board is full
      */
+    Serial.print("hello");
     if (d == 0 || d >= (NUM_COL * NUM_ROW) - turns) {
       // get current score to return
       return {tabScore(b, COMPUTER), -1};
     }
     if (p == COMPUTER) { // if AI player
+      Serial.write("AI");
       vector<int> moveSoFar = {INT_MIN, -1}; // since maximizing, we want lowest possible value
       if (winningMove(b, PLAYER)) { // if player about to win
         return moveSoFar; // force it to say it's worst possible score, so it knows to avoid move
@@ -234,6 +250,7 @@
           vector<vector<int> > newBoard = copyBoard(b); // make a copy of the board
           makeMove(newBoard, c, p); // try the move
           int score = miniMax(newBoard, d - 1, alf, bet, PLAYER)[0]; // find move based on that new board state
+          Serial.print(score);
           if (score > moveSoFar[0]) { // if better score, replace it, and consider that best move (for now)
             moveSoFar = {score, (int) c};
           }
@@ -244,6 +261,7 @@
       return moveSoFar; // return best possible move
     }
     else {
+      Serial.write("PLAYER");
       vector<int> moveSoFar = {INT_MAX, -1}; // since PLAYER is minimized, we want moves that diminish this score
       if (winningMove(b, COMPUTER)) {
         return moveSoFar; // if about to win, report that move as best
@@ -478,7 +496,7 @@
             prevTime = currTime;
             placed = true;
 
-            makeMove(board, x_pos, COMPUTER); //ai move
+            makeMove(board, x_pos, PLAYER); //player move
             if (turns == NUM_ROW * NUM_COL) { // if max number of turns reached
               gameOver = true;
             }
@@ -516,6 +534,7 @@
   
   void loop() {
       if (!gameOver) { // while no game over state 
+          Serial.write("player");
           bluecursor(); //player move
           if (gameOver) {
               delay(2000);
@@ -534,6 +553,7 @@
                 bluecursor();
               }
           }
+          Serial.write("ai");
           redcursor(); //ai move
           if (gameOver) {
               delay(2000);
