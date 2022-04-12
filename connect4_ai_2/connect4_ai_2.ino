@@ -1,9 +1,10 @@
   //LEDs
-  #include <FastLED.h>
-  #include <stdio.h>
-  #include <StandardCplusplus.h>
-  #include <vector>
-  #include <Array.h>
+  #include "FastLED.h"
+  #include "stdio.h"
+  #include "StandardCplusplus.h"
+  #include "vector"
+  //#include "ArduinoSTL.h"
+  #include "new"
 
   using namespace std;
   
@@ -22,7 +23,7 @@
   bool winningMove(vector<vector<int> >&, unsigned int);
   int scoreSet(vector<unsigned int>, unsigned int);
   int tabScore(vector<vector<int> >, unsigned int);
-  Array<int, 2> miniMax(vector<vector<int> >&, unsigned int, int, int, unsigned int);
+  vector<int> miniMax(vector<vector<int> >&, unsigned int, int, int, unsigned int);
   int heurFunction(unsigned int, unsigned int, unsigned int);
 
   #define min(a,b) (((a) < (b)) ? (a) : (b))
@@ -47,15 +48,18 @@
   #define DIR_RIGHT 3
   
   // I'll be real and say this is just to avoid magic numbers
-  unsigned int NUM_COL = 7; // how wide is the board
-  unsigned int NUM_ROW = 6; // how tall
+  unsigned int NUM_COL = 8; // how wide is the board
+  unsigned int NUM_ROW = 9; // how tall
   unsigned int PLAYER = 1; // player number
   unsigned int COMPUTER = 2; // AI number
   unsigned int MAX_DEPTH = 5; // the default "difficulty" of the computer controlled AI
   
   bool gameOver = false; // flag for if game is over
   unsigned int turns = 0; // count for # turns
-  unsigned int currentPlayer = PLAYER; // current player
+  unsigned int currentPlayer = PLAYER; // current player: 1 (player) or 2 (AI)
+
+  int INT_MAX = 10000;
+  int INT_MIN = -10000;
   
   vector<vector<int>> board(NUM_ROW, vector<int>(NUM_COL)); // the game board
   
@@ -85,13 +89,14 @@
   CRGB wColor = CRGB(255, 255, 255); // white
   CRGB eColor = CRGB(0, 0, 0); // clear/empty
   CRGB gColor = CRGB(0, 255, 0); //green
+
+  int x_pos = 0;
+  int y_pos = 7;
   
   void setup() {
       // reset positions
       x_pos = 0;
       y_pos = 7;
-      winner = false;
-      who = PIECE_X;
   
       // setup buttons
       pinMode(LEFT1, INPUT_PULLUP);
@@ -120,19 +125,19 @@
       }
   }
   
-  void place() {
-  // Place WHO at X_POS, Y_POS
+  void place(int x_pos) {
+  // Place WHO at X_POS
     bool placed = false;
     for (int i = 0; i < 8; i++) {
-        if (game[x_pos][i] == PIECE_EMPTY) {
-            if (who == PIECE_X) {
+        if (board[x_pos][i] == 0) {
+            if (PLAYER == 1) {
                 leds[board_side_1[x_pos][i]] = xColor;
                 leds[board_side_2[x_pos][i]] = xColor;
-                game[x_pos][i] = PIECE_X;
+                board[x_pos][i] = 1;
             } else {
                 leds[board_side_1[x_pos][i]] = oColor;
                 leds[board_side_2[x_pos][i]] = oColor;
-                game[x_pos][i] = PIECE_O;
+                board[x_pos][i] = 2;
             }
             FastLED.show();
             placed = true;
@@ -141,7 +146,7 @@
     }
 
     if (!placed) {
-        if (who == PIECE_X) {
+        if (PLAYER == 1) {
             bluecursor();
         }
         else {
@@ -149,21 +154,15 @@
         }
     }
 
-    //add check for win here later
-    if (checkForWin(who)) {
-        winner = true;
-    } else {
-        who = opposite(who);
-    }
     return;
   }
   
 
   void winnerblink() {
     //modify to blink only winning squares later
-    if (winner) {
+    if (gameOver) {
       for (int i = 0; i < NUM_LEDS; i++) {
-        if (who == PIECE_X) {
+        if (PLAYER == 1) {
           leds[i] = xColor;
         }
         else {
@@ -210,7 +209,7 @@
    * @param bet - beta
    * @param p - current player
    */
-  Array<int, 2> miniMax(vector<vector<int> > &b, unsigned int d, int alf, int bet, unsigned int p) {
+  vector<int> miniMax(vector<vector<int> > &b, unsigned int d, int alf, int bet, unsigned int p) {
     /**
      * if we've reached minimal depth allowed by the program
      * we need to stop, so force it to return current values
@@ -223,10 +222,10 @@
      */
     if (d == 0 || d >= (NUM_COL * NUM_ROW) - turns) {
       // get current score to return
-      return Array<int, 2>{tabScore(b, COMPUTER), -1};
+      return {tabScore(b, COMPUTER), -1};
     }
     if (p == COMPUTER) { // if AI player
-      Array<int, 2> moveSoFar = {INT_MIN, -1}; // since maximizing, we want lowest possible value
+      vector<int> moveSoFar = {INT_MIN, -1}; // since maximizing, we want lowest possible value
       if (winningMove(b, PLAYER)) { // if player about to win
         return moveSoFar; // force it to say it's worst possible score, so it knows to avoid move
       } // otherwise, business as usual
@@ -236,7 +235,7 @@
           makeMove(newBoard, c, p); // try the move
           int score = miniMax(newBoard, d - 1, alf, bet, PLAYER)[0]; // find move based on that new board state
           if (score > moveSoFar[0]) { // if better score, replace it, and consider that best move (for now)
-            moveSoFar = {score, (int)c};
+            moveSoFar = {score, (int) c};
           }
           alf = max(alf, moveSoFar[0]);
           if (alf >= bet) { break; } // for alpha-beta pruning
@@ -245,7 +244,7 @@
       return moveSoFar; // return best possible move
     }
     else {
-      Array<int, 2> moveSoFar = {INT_MAX, -1}; // since PLAYER is minimized, we want moves that diminish this score
+      vector<int> moveSoFar = {INT_MAX, -1}; // since PLAYER is minimized, we want moves that diminish this score
       if (winningMove(b, COMPUTER)) {
         return moveSoFar; // if about to win, report that move as best
       }
@@ -255,7 +254,7 @@
           makeMove(newBoard, c, p);
           int score = miniMax(newBoard, d - 1, alf, bet, COMPUTER)[0];
           if (score < moveSoFar[0]) {
-            moveSoFar = {score, (int)c};
+            moveSoFar = {score, (int) c};
           }
           bet = min(bet, moveSoFar[0]);
           if (alf >= bet) { break; } //alpha-beta pruning
@@ -359,13 +358,30 @@
    */
   int heurFunction(unsigned int g, unsigned int b, unsigned int z) {
     int score = 0;
-    if (g == 4) { score += 500001; } // preference to go for winning move vs. block
-    else if (g == 3 && z == 1) { score += 5000; }
-    else if (g == 2 && z == 2) { score += 500; }
-    else if (b == 2 && z == 2) { score -= 501; } // preference to block
-    else if (b == 3 && z == 1) { score -= 5001; } // preference to block
-    else if (b == 4) { score -= 500000; }
+    if (g == 4) { score += 5001; } // preference to go for winning move vs. block
+    else if (g == 3 && z == 1) { score += 50; }
+    else if (g == 2 && z == 2) { score += 5; }
+    else if (b == 2 && z == 2) { score -= 6; } // preference to block
+    else if (b == 3 && z == 1) { score -= 51; } // preference to block
+    else if (b == 4) { score -= 5000; }
     return score;
+  }
+
+  /**
+   * function to copy board state to another 2D vector
+   * ie. make a duplicate board; used for mutating copies rather
+   * than the original
+   * @param b - the board to copy
+   * @return - said copy
+   */
+  vector<vector<int> > copyBoard(vector<vector<int> > b) {
+    vector<vector<int>> newBoard(NUM_ROW, vector<int>(NUM_COL));
+    for (unsigned int r = 0; r < NUM_ROW; r++) {
+      for (unsigned int c = 0; c < NUM_COL; c++) {
+        newBoard[r][c] = b[r][c]; // just straight copy
+      }
+    }
+    return newBoard;
   }
   
   /**
@@ -457,7 +473,7 @@
         else if (digitalRead(PLACE1) == LOW) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                place();
+                place(x_pos);
             }
             prevTime = currTime;
             placed = true;
@@ -475,26 +491,26 @@
   }
       
   void redblink() {
-      if (game[x_pos][y_pos] == PIECE_EMPTY) {
-        leds[board_side_2[x_pos][y_pos]] = gColor;
-        FastLED.show();
-        delay(500);
-        leds[board_side_2[x_pos][y_pos]] = eColor;
-        FastLED.show();
-        delay(100);
-      }
+      //if (game[x_pos][y_pos] == 0) {
+      leds[board_side_2[x_pos][y_pos]] = gColor;
+      FastLED.show();
+      delay(500);
+      leds[board_side_2[x_pos][y_pos]] = eColor;
+      FastLED.show();
+      delay(100);
+      //}
       return;
   }
 
   void blueblink() {
-      if (game[x_pos][y_pos] == PIECE_EMPTY) {
-        leds[board_side_1[x_pos][y_pos]] = gColor;
-        FastLED.show();
-        delay(500);
-        leds[board_side_1[x_pos][y_pos]] = eColor;
-        FastLED.show();
-        delay(100);
-      }
+      //if (game[x_pos][y_pos] == 0) {
+      leds[board_side_1[x_pos][y_pos]] = gColor;
+      FastLED.show();
+      delay(500);
+      leds[board_side_1[x_pos][y_pos]] = eColor;
+      FastLED.show();
+      delay(100);
+      //}
       return;
   }
   
