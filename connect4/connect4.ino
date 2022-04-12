@@ -1,3 +1,9 @@
+// python-build-start
+// "C:\Program Files (x86)\Arduino\arduino.exe"
+// arduino:avr:uno
+// COM3
+// python-build-end
+  
   //LEDs
   #include <FastLED.h>
   #define NUM_LEDS    144
