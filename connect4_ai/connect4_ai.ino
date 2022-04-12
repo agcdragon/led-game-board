@@ -195,7 +195,7 @@
   
   void redcursor() {
     bool placed = false;
-//    check for ai win possibilities
+    //check for ai win possibilities
     for (int i = 0; i < 9; i++) {
         x_pos = i;
         int y1_pos = -1;
@@ -244,13 +244,14 @@
       }
     }
     
-    // random placeholder heuristic
+    //random placeholder heuristic
     if (!placed) {
        x_pos = random(8);
        place();
        placed=true;
     }
     
+    return;
   }
 
   void bluecursor() {

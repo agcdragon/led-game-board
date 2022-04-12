@@ -14,12 +14,12 @@ int resetDelay = 250;
 CRGB leds[NUM_LEDS];
 
 //Buttons
-const char LEFT1 = 12;
-const char RIGHT1 = 11;
-const char LEFT2 = 10;
-const char RIGHT2 = 9;
+const char LEFT1 = 10;
+const char RIGHT1 = 9;
+const char LEFT2 = 5;
+const char RIGHT2 = 4;
 const char PLACE1 = 8;
-const char PLACE2 = 7;
+const char PLACE2 = 3;
 
 // Directions
 #define DIR_UP    0
@@ -227,7 +227,7 @@ void redcursor() {
           }
           prevTime = currTime;
       }
-      else if (digitalRead(PLACE1) == LOW) {
+      else if (digitalRead(PLACE2) == LOW) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               place();
