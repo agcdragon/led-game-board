@@ -227,41 +227,81 @@ void setupcursor(int x, int y, int id) {
   bool placed = false;
   while (!placed) {
       cursorblink(x, y);
-      if (digitalRead(LEFT) == LOW) {
+      if (who == PIECE_X) {
+        if (digitalRead(LEFT) == LOW) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               x_pos = max(x_pos-1, 0);
           }
           prevTime = currTime;
-      }
-      else if (digitalRead(RIGHT) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              x_pos = min(x_pos+1, 8);
-          }
-          prevTime = currTime;
-      }
-      else if (digitalRead(DOWN) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              y_pos = max(y_pos-1, 0);
-          }
-          prevTime = currTime;
-      }
-      else if (digitalRead(UP) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              y_pos = min(y_pos+1, 7);
-          }
-          prevTime = currTime;
-      }
-      else if (digitalRead(PLACE) == LOW && placeable(x, y, x_pos, y_pos)) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              place(x, y, x_pos, y_pos, id);
-          }
-          placed = true;
-          prevTime = currTime;
+        }
+        else if (digitalRead(RIGHT) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = min(x_pos+1, 8);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(DOWN) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = max(y_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(UP) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = min(y_pos+1, 7);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(PLACE) == LOW && placeable(x, y, x_pos, y_pos)) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                place(x, y, x_pos, y_pos, id);
+            }
+            placed = true;
+            prevTime = currTime;
+        }
+      } 
+      else {
+        if (digitalRead(LEFT2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = max(x_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(RIGHT2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = min(x_pos+1, 8);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(DOWN2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = max(y_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(UP2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = min(y_pos+1, 7);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(PLACE2) == LOW && placeable(x, y, x_pos, y_pos)) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                place(x, y, x_pos, y_pos, id);
+            }
+            placed = true;
+            prevTime = currTime;
+        }
       }
   }
   return;
@@ -373,55 +413,6 @@ void fire(int x, int y) {
   FastLED.show();
 }
 
-void gamecursor() {
-  x_pos = 4;
-  y_pos = 4;
-  bool placed = false;
-  while (!placed) {
-      cursorblink(1, 1);
-      if (digitalRead(LEFT) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              x_pos = max(x_pos-1, 0);
-          }
-          prevTime = currTime;
-      }
-      else if (digitalRead(RIGHT) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              x_pos = min(x_pos+1, 8);
-          }
-          prevTime = currTime;
-      }
-      else if (digitalRead(DOWN) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              y_pos = max(y_pos-1, 0);
-          }
-          prevTime = currTime;
-      }
-      else if (digitalRead(UP) == LOW) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              y_pos = min(y_pos+1, 7);
-          }
-          prevTime = currTime;
-      }
-      else if (digitalRead(PLACE) == LOW && fireable()) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              fire(x_pos, y_pos);
-          }
-          winner = win();
-          placed = true;
-          prevTime = currTime;
-      }
-  }
-  if (!winner) {
-    who = opposite(who);
-  }
-  return;
-}
 
 void gamecursor(char player) {
   x_pos = 4;
