@@ -7,8 +7,6 @@ import sys
 # Create a Tkinter GUI
 from tkinter import *
 
-GAME = "tictactoe"
-
 def id():
     start()
 
@@ -51,6 +49,8 @@ def snake():
     GAME = "snake"
 
 def reset():
+    global GAME, w, h
+    GAME = ""
     for widget in win.winfo_children():
         widget.destroy()
     frame = Frame(win)
@@ -109,7 +109,7 @@ sc_width, sc_height = win.winfo_screenwidth(), win.winfo_screenheight()
 win.geometry = (f"{sc_width}x{sc_height}")
 win.state('normal')
 
-print(sc_width)
+GAME = ""
 w = 25
 h = 6
 f = "Arial 20"
