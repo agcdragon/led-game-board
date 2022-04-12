@@ -75,6 +75,8 @@
       y_pos = 7;
       winner = false;
       who = PIECE_X;
+
+      
   
       // setup buttons
       pinMode(LEFT1, INPUT_PULLUP);
