@@ -67,7 +67,7 @@ def reset():
 def start():
     print(GAME)
     actionLine = "upload"
-    projectFile = f"C:/Users/andy/ThetaTau/theta-tau-ep/{GAME}/{GAME}.ino"
+    projectFile = f"/home/alphaepsilons/theta-tau-ep/{GAME}/{GAME}.ino"
 
     codeFile = open(projectFile, 'r')
     startLine = codeFile.readline()[3:].strip()
@@ -105,7 +105,9 @@ def start():
 
 # Create tkinter object and initialize window
 win = Tk()
-win.geometry = ("700x480")
+sc_width, sc_height = win.winfo_screenwidth(), win.winfo_screenheight()
+win.geometry = (f"{sc_width}x{sc_height}")
+win.state('zoomed')
 
 w = 20
 h = 5
