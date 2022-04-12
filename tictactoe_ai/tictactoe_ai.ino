@@ -1,7 +1,7 @@
 // python-build-start
 // "C:\Program Files (x86)\Arduino\arduino.exe"
 // arduino:avr:uno
-// COM3
+// /dev/ttyACM0
 // python-build-end
 
 //LEDs
