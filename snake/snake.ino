@@ -1,7 +1,7 @@
 //LEDs
 #include <FastLED.h>
 #include <LinkedList.h>
-#define NUM_LEDS    72 
+#define NUM_LEDS    144
 #define LED_PIN     13
 int rows = 9;
 int columns = 8;
@@ -85,6 +85,13 @@ void setup() {
 
   // setup ws2812b leds
   FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
+
+
+  //reset board after game to be all empty
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = emptyColor;
+  }
+  FastLED.show();
 }
 
 void loop() {
