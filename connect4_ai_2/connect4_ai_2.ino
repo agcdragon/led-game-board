@@ -19,6 +19,9 @@
   int aiMove();
   void bluecursor();
   void redcursor();
+  void blueblink();
+  void redblink();
+  void reset();
   vector<vector<int> > copyBoard(vector<vector<int> >);
   bool winningMove(vector<vector<int> >&, unsigned int);
   int scoreSet(vector<unsigned int>, unsigned int);

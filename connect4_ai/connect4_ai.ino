@@ -201,18 +201,19 @@
   void redcursor() {
     bool placed = false;
 //    check for ai win possibilities
+
     for (int i = 0; i < 9; i++) {
         x_pos = i;
-        int y_pos = -1;
+        int y1_pos = -1;
         for (int j = 0; j < 8; j++) {
             if (game[i][j] == PIECE_EMPTY) {
-                y_pos = j;
+                y1_pos = j;
             }
         }
-        if (y_pos > 0) {
-            game[i][y_pos] = PIECE_X;
+        if (y1_pos > 0) {
+            game[i][y1_pos] = PIECE_X;
             if (checkForWin(PIECE_X)) {
-                game[i][y_pos] = PIECE_EMPTY;
+                game[i][y1_pos] = PIECE_EMPTY;
                 place();
                 placed = true;
             }
@@ -222,31 +223,31 @@
         }
     }
     //check for other player win possibilities to block
-    for (int i = 0; i < 9; i++) {
-        x_pos = i;
-        int y_pos = -1;
-        for (int j = 0; j < 8; j++) {
-            if (game[i][j] == PIECE_EMPTY) {
-                y_pos = j;
-            }
-        }
-        if (y_pos > 0) {
-            game[i][y_pos] = PIECE_O;
-            if (checkForWin(PIECE_O)) {
-                game[i][y_pos] = PIECE_EMPTY;
-                place();
-                placed = true;
-            }
-        }
-        if (placed = true) {
-            break;
-        }
-    //place based on an evaluation algorithm of the board, ex. number of ai squares in the area
+    if (!placed) {
+      for (int i = 0; i < 9; i++) {
+          x_pos = i;
+          int y1_pos = -1;
+          for (int j = 0; j < 8; j++) {
+              if (game[i][j] == PIECE_EMPTY) {
+                  y1_pos = j;
+              }
+          }
+          if (y1_pos > 0) {
+              game[i][y1_pos] = PIECE_O;
+              if (checkForWin(PIECE_O)) {
+                  game[i][y1_pos] = PIECE_EMPTY;
+                  place();
+                  placed = true;
+              }
+          }
+      }
     }
+    
     // random placeholder heuristic
     if (!placed) {
        x_pos = random(8);
        place();
+       placed=true;
     }
     
   }
