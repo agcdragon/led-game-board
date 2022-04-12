@@ -12,18 +12,19 @@ long unsigned int prevTime = 0;
 int resetDelay = 250;
 CRGB leds[NUM_LEDS];
 
-//Buttons
+//Buttons P1
 const char UP = 12;
 const char DOWN = 11;
 const char LEFT = 10;
 const char RIGHT = 9;
 const char PLACE = 8;
 
-// Directions
-#define DIR_UP    0
-#define DIR_DOWN  1
-#define DIR_LEFT  2
-#define DIR_RIGHT 3
+//Buttons P2
+const char UP2 = 7;
+const char DOWN2 = 6;
+const char LEFT2 = 5;
+const char RIGHT2 = 4;
+const char PLACE2 = 3;
 
 // Positions
 int x_pos = 4;
@@ -177,8 +178,7 @@ void place(int dimx, int dimy, int x, int y, int id) {
 
 bool placeable(int dimx, int dimy, int x, int y) {
 // Place WHO ship at (x, y) with dimensions (dimx, dimy), assume placeable
-  if (who == PIECE_X)
-  {
+  if (who == PIECE_X) {
     for (int i = x; i < x + dimx; i++) {
       for (int j = y; j < y + dimy; j++) {
         if ((i < 0 || i >= 9 || j < 0 || j >= 8) || game1[i][j] != PIECE_EMPTY) {
@@ -197,6 +197,13 @@ bool placeable(int dimx, int dimy, int x, int y) {
     }
     return true;
   }
+}
+
+bool fireable() {
+  if (who == PIECE_X) {
+    return game2[x_pos][y_pos] == PIECE_EMPTY;
+  } 
+  return game1[x_pos][y_pos] == PIECE_EMPTY;
 }
 
 void winnerblink() {
@@ -400,7 +407,7 @@ void gamecursor() {
           }
           prevTime = currTime;
       }
-      else if (digitalRead(PLACE) == LOW && placeable(1, 1, x_pos, y_pos)) {
+      else if (digitalRead(PLACE) == LOW && fireable()) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               fire(x_pos, y_pos);
@@ -416,9 +423,99 @@ void gamecursor() {
   return;
 }
 
+void gamecursor(char player) {
+  x_pos = 4;
+  y_pos = 4;
+  bool placed = false;
+  while (!placed) {
+      cursorblink(1, 1);
+      if (player == PIECE_X) {
+        if (digitalRead(LEFT) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = max(x_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(RIGHT) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = min(x_pos+1, 8);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(DOWN) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = max(y_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(UP) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = min(y_pos+1, 7);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(PLACE) == LOW && fireable()) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                fire(x_pos, y_pos);
+            }
+            winner = win();
+            placed = true;
+            prevTime = currTime;
+        }
+      } else {
+        if (digitalRead(LEFT2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = max(x_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(RIGHT2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = min(x_pos+1, 8);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(DOWN2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = max(y_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(UP2) == LOW) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                y_pos = min(y_pos+1, 7);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead(PLACE2) == LOW && fireable()) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                fire(x_pos, y_pos);
+            }
+            winner = win();
+            placed = true;
+            prevTime = currTime;
+        }
+      }
+  }
+  if (!winner) {
+    who = opposite(who);
+  }
+  return;
+}
+
 void loop() {
     if (!winner) {
-      gamecursor();
+      gamecursor(who);
     } else {
       winnerblink();
       delay(10000);
