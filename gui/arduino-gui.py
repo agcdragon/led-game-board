@@ -33,8 +33,8 @@ def connect4():
         widget.destroy()
     frame = Frame(win)
     frame.pack()
-    Button(frame, text="PvP", font=(f), width=w, height=h, command=id).grid(row=0, column=0)
-    Button(frame, text="AI", font=(f), width=w, height=h, command=ai).grid(row=0, column=1)
+    Button(frame, text="PvP", font=(f), width=w, height=h*2, command=id).grid(row=0, column=0)
+    Button(frame, text="AI", font=(f), width=w, height=h*2, command=ai).grid(row=0, column=1)
     win.mainloop()
 
 def battle():
@@ -44,16 +44,18 @@ def battle():
         widget.destroy()
     frame = Frame(win)
     frame.pack()
-    Button(frame, text="PvP", font=(f), width=w, height=h, command=id).grid(row=0, column=0)
-    Button(frame, text="AI", font=(f), width=w, height=h, command=ai).grid(row=0, column=1)
+    Button(frame, text="PvP", font=(f), width=w, height=h*2, command=id).grid(row=0, column=0)
+    Button(frame, text="AI", font=(f), width=w, height=h*2, command=ai).grid(row=0, column=1)
     win.mainloop()
 
 def snake():
     global GAME, w, h
     for widget in win.winfo_children():
         widget.destroy()
+    frame = Frame(win)
+    frame.pack()
+    Button(frame, text="Singleplayer", font=(f), width=w*2, height=h*2, command=id).grid(row=0, column=0)
     GAME = "snake"
-    start()
 
 def reset():
     global GAME, w, h
