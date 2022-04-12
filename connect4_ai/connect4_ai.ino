@@ -192,16 +192,10 @@
     }
     return;
   }
-
-  int heuristic(int g[8][9]) {
-    
-  }
-
   
   void redcursor() {
     bool placed = false;
 //    check for ai win possibilities
-
     for (int i = 0; i < 9; i++) {
         x_pos = i;
         int y1_pos = -1;
@@ -216,6 +210,8 @@
                 game[i][y1_pos] = PIECE_EMPTY;
                 place();
                 placed = true;
+            } else {
+                game[i][y1_pos] = PIECE_EMPTY;
             }
         }
         if (placed = true) {
@@ -238,8 +234,13 @@
                   game[i][y1_pos] = PIECE_EMPTY;
                   place();
                   placed = true;
+              } else {
+                game[i][y1_pos] = PIECE_EMPTY;
               }
-          }
+           }
+           if (placed = true) {
+            break;
+           }
       }
     }
     

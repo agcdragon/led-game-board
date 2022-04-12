@@ -18,7 +18,7 @@ const char DOWN_PIN = 11;
 const char LEFT_PIN = 10;
 const char RIGHT_PIN = 9;
 const char PLACE_PIN = 8;
-const char RESET_PIN = 7;
+
 
 // Directions
 #define DIR_UP    0

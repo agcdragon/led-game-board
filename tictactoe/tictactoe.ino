@@ -18,7 +18,12 @@ const char DOWN_PIN = 11;
 const char LEFT_PIN = 10;
 const char RIGHT_PIN = 9;
 const char PLACE_PIN = 8;
-const char RESET_PIN = 7;
+
+const char UP_PIN2 = 7;
+const char DOWN_PIN2 = 6;
+const char LEFT_PIN2 = 5;
+const char RIGHT_PIN2 = 4;
+const char PLACE_PIN2 = 3;
 
 // Directions
 #define DIR_UP    0
@@ -78,7 +83,13 @@ void setup() {
     pinMode(LEFT_PIN, INPUT_PULLUP);
     pinMode(RIGHT_PIN, INPUT_PULLUP);
     pinMode(PLACE_PIN, INPUT_PULLUP);
-    pinMode(RESET_PIN, INPUT_PULLUP);
+
+    pinMode(UP_PIN2, INPUT_PULLUP);
+    pinMode(DOWN_PIN2, INPUT_PULLUP);
+    pinMode(LEFT_PIN2, INPUT_PULLUP);
+    pinMode(RIGHT_PIN2, INPUT_PULLUP);
+    pinMode(PLACE_PIN2, INPUT_PULLUP);
+
 
     // setup ws2812b leds
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
@@ -233,7 +244,7 @@ void redcursor() {
     bool placed = false;
     while (!placed) {
       redblink();
-      if (digitalRead(UP_PIN) == LOW) {
+      if (digitalRead(UP_PIN2) == LOW) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               int prev_x = x_pos;
@@ -260,7 +271,7 @@ void redcursor() {
           }
           prevTime = currTime;
       }
-      else if (digitalRead(DOWN_PIN) == LOW) {
+      else if (digitalRead(DOWN_PIN2) == LOW) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               int prev_x = x_pos;
@@ -287,7 +298,7 @@ void redcursor() {
           }
           prevTime = currTime;
       }
-      else if (digitalRead(LEFT_PIN) == LOW) {
+      else if (digitalRead(LEFT_PIN2) == LOW) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               int prev_y = y_pos;
@@ -314,7 +325,7 @@ void redcursor() {
           }
           prevTime = currTime;
       }
-      else if (digitalRead(RIGHT_PIN) == LOW) {
+      else if (digitalRead(RIGHT_PIN2) == LOW) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               int prev_y = y_pos;
@@ -341,7 +352,7 @@ void redcursor() {
           }
           prevTime = currTime;
       }
-      else if (digitalRead(PLACE_PIN) == LOW) {
+      else if (digitalRead(PLACE_PIN2) == LOW) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               placed = true;
