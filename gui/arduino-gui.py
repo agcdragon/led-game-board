@@ -18,7 +18,7 @@ def ai():
     start() 
 
 def ttt():
-    global GAME
+    global GAME, w, h
     GAME = "tictactoe"
     for widget in win.winfo_children():
         widget.destroy()
@@ -29,7 +29,7 @@ def ttt():
     win.mainloop()
 
 def connect4():
-    global GAME
+    global GAME, w, h
     GAME = "connect4"
     frame = Frame(win)
     frame.pack()
@@ -38,7 +38,7 @@ def connect4():
     win.mainloop()
 
 def battle():
-    global GAME
+    global GAME, w, h
     GAME = "battleship"
     frame = Frame(win)
     frame.pack()
@@ -47,7 +47,7 @@ def battle():
     win.mainloop()
 
 def snake():
-    global GAME
+    global GAME, w, h
     GAME = "snake"
 
 def reset():
@@ -109,7 +109,8 @@ sc_width, sc_height = win.winfo_screenwidth(), win.winfo_screenheight()
 win.geometry = (f"{sc_width}x{sc_height}")
 win.state('zoomed')
 
-w = 20
-h = 5
+print(sc_width)
+w = 40
+h = 10
 f = "Arial 20"
 reset()
