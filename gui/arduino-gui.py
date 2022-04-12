@@ -56,9 +56,9 @@ def reset():
     frame = Frame(win)
     frame.pack()
     Button(frame, text="Tic-Tac-Toe", font=(f), width=w, height=h, command=ttt).grid(row=0, column=0)
-    Button(frame, text="Connect4", font=(f), width=w, height=h, command=ttt).grid(row=0, column=1)
-    Button(frame, text="Battleship", font=(f), width=w, height=h, command=ttt).grid(row=1, column=0)
-    Button(frame, text="Snake", font=(f), width=w, height=h, command=ttt).grid(row=1, column=1)
+    Button(frame, text="Connect4", font=(f), width=w, height=h, command=connect4).grid(row=0, column=1)
+    Button(frame, text="Battleship", font=(f), width=w, height=h, command=battle).grid(row=1, column=0)
+    Button(frame, text="Snake", font=(f), width=w, height=h, command=snake).grid(row=1, column=1)
     win.mainloop()
 
 ##########################################    
