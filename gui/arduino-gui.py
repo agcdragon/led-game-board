@@ -107,10 +107,10 @@ def start():
 win = Tk()
 sc_width, sc_height = win.winfo_screenwidth(), win.winfo_screenheight()
 win.geometry = (f"{sc_width}x{sc_height}")
-win.state('zoomed')
+win.state('normal')
 
 print(sc_width)
-w = 40
-h = 10
+w = 25
+h = 6
 f = "Arial 20"
 reset()
