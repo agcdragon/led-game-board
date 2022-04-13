@@ -93,6 +93,12 @@ void setup() {
     pinMode(RIGHT, INPUT_PULLUP);
     pinMode(PLACE, INPUT_PULLUP);
 
+    pinMode(UP2, INPUT_PULLUP);
+    pinMode(DOWN2, INPUT_PULLUP);
+    pinMode(LEFT2, INPUT_PULLUP);
+    pinMode(RIGHT2, INPUT_PULLUP);
+    pinMode(PLACE2, INPUT_PULLUP);
+    
     // setup ws2812b leds
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
 
@@ -421,99 +427,112 @@ void fire(int x, int y) {
 }
 
 
-void gamecursor(char player) {
+void gamecursor() {
   x_pos = 4;
   y_pos = 4;
   bool placed = false;
   while (!placed) {
-      cursorblink(1, 1);
-      if (player == PIECE_X) {
-        if (digitalRead(LEFT) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = max(x_pos-1, 0);
-            }
-            prevTime = currTime;
+    cursorblink(1, 1);
+    if (digitalRead(LEFT) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = max(x_pos-1, 0);
         }
-        else if (digitalRead(RIGHT) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 8);
-            }
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(RIGHT) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = min(x_pos+1, 8);
         }
-        else if (digitalRead(DOWN) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = max(y_pos-1, 0);
-            }
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(DOWN) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = max(y_pos-1, 0);
         }
-        else if (digitalRead(UP) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 7);
-            }
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(UP) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = min(y_pos+1, 7);
         }
-        else if (digitalRead(PLACE) == LOW && fireable()) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                fire(x_pos, y_pos);
-            }
-            winner = win();
-            placed = true;
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(PLACE) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            fire(x_pos, y_pos);
         }
-      } else {
-        if (digitalRead(LEFT2) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = max(x_pos-1, 0);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(RIGHT2) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 8);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(DOWN2) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = max(y_pos-1, 0);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(UP2) == LOW) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 7);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(PLACE2) == LOW && fireable()) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                fire(x_pos, y_pos);
-            }
-            winner = win();
-            placed = true;
-            prevTime = currTime;
-        }
-      }
+        winner = win();
+        placed = true;
+        prevTime = currTime;
+    }
   }
   if (!winner) {
     who = opposite(who);
   }
-  return;
+}
+void gamecursor2() {
+  x_pos = 4;
+  y_pos = 4;
+  bool placed = false;
+  while (!placed) {
+    cursorblink(1, 1);
+    if (digitalRead(LEFT2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = max(x_pos-1, 0);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(RIGHT2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = min(x_pos+1, 8);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(DOWN2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = max(y_pos-1, 0);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(UP2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = min(y_pos+1, 7);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(PLACE2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            fire(x_pos, y_pos);
+        }
+        winner = win();
+        placed = true;
+        prevTime = currTime;
+    }
+  }
+  if (!winner) {
+    who = opposite(who);
+  }
 }
 
 void loop() {
     if (!winner) {
-      gamecursor(who);
+      if (who == PIECE_X)
+      {
+        gamecursor();
+      }
+      else {
+        gamecursor2();
+      }
     } else {
       winnerblink();
       delay(10000);
@@ -562,7 +581,7 @@ void reset() {
       int dimx = ships[i][0];
       int dimy = ships[i][1];
       int id = ships[i][2];
-      setupcursor(dimx, dimy, id);
+      setupcursor2(dimx, dimy, id);
       x_pos = 4;
       y_pos = 4;
     }
