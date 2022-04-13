@@ -224,6 +224,8 @@ void winnerblink() {
 
 void setupcursor(int x, int y, int id) {
 // the cursor to place ships, blink potential ship placement
+  x_pos = 4;
+  y_pos = 4;
   bool placed = false;
   while (!placed) {
       cursorblink(x, y);
