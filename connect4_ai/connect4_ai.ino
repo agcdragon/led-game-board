@@ -4,7 +4,10 @@
 // /dev/ttyACM0
 // python-build-end
   
+<<<<<<< HEAD
   
+=======
+>>>>>>> f10b30694b684ff0dee9d4f50f078e7dc0984712
   //LEDs
   #include <FastLED.h>
   #define NUM_LEDS    144

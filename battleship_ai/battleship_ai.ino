@@ -119,38 +119,7 @@ void setup() {
         }
     }
 
-    // player 1 places ships
-    for (int i = 0; i < NUM_SHIPS; i++) {
-      int dimx = ships[i][0];
-      int dimy = ships[i][1];
-      int id = ships[i][2];
-      setupcursor(dimx, dimy, id);
-      x_pos = 4;
-      y_pos = 4;
-    }
-
-    // player 2 places ships
-    who = opposite(who);
-    for (int i = 0; i < NUM_SHIPS; i++) {
-      int dimx = ships[i][0];
-      int dimy = ships[i][1];
-      int id = ships[i][2];
-      setupcursor2(dimx, dimy, id);
-      x_pos = 4;
-      y_pos = 4;
-    }
-
-    // reset led board to be water
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 8; j++) {
-            leds[board_side_1[i][j]] = waterColor;
-            leds[board_side_2[i][j]] = waterColor;
-        }
-    }
-    FastLED.show();
-    
-    //switch back to player X
-    who = opposite(who);
+    reset();
 }
 
 char opposite(char piece) {
@@ -203,13 +172,6 @@ bool placeable(int dimx, int dimy, int x, int y) {
     }
     return true;
   }
-}
-
-bool fireable() {
-  if (who == PIECE_X) {
-    return game2[x_pos][y_pos] == PIECE_EMPTY;
-  } 
-  return game1[x_pos][y_pos] == PIECE_EMPTY;
 }
 
 void winnerblink() {
@@ -426,7 +388,6 @@ void fire(int x, int y) {
   FastLED.show();
 }
 
-
 void gamecursor() {
   x_pos = 4;
   y_pos = 4;
@@ -524,6 +485,37 @@ void gamecursor2() {
   }
 }
 
+void placeRandom(int dimx, int dimy, int id) {
+  int x = random(9);
+  int y = random(8);
+  while(!placeable(dimx, dimy, x, y)) {
+     x = random(9);
+     y = random(8);
+  }
+  place(dimx, dimy, x, y, id);
+}
+
+void fireRandom() {
+    if (who == PIECE_O) {
+      int x = random(9);
+      int y = random(8);
+      fire(x, y);
+      winner = win();
+      if (!winner) {
+        who = opposite(who);
+      }
+    } else {
+      int x = random(9);
+      int y = random(8);
+      fire(x, y);
+      winner = win();
+      if (!winner) {
+        who = opposite(who);
+      }
+    }
+    FastLED.show();
+}
+
 void loop() {
     if (!winner) {
       if (who == PIECE_X)
@@ -531,7 +523,7 @@ void loop() {
         gamecursor();
       }
       else {
-        gamecursor2();
+        fireRandom();
       }
     } else {
       winnerblink();
@@ -581,10 +573,10 @@ void reset() {
       int dimx = ships[i][0];
       int dimy = ships[i][1];
       int id = ships[i][2];
-      setupcursor2(dimx, dimy, id);
-      x_pos = 4;
-      y_pos = 4;
+      placeRandom(dimx, dimy, id);
     }
+    x_pos = 4;
+    y_pos = 4;
 
     // reset led board to be water
     for (int i = 0; i < 9; i++) {
