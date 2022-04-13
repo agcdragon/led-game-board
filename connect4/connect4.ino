@@ -96,8 +96,8 @@ void setup() {
     // reset led board to be empty
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 8; j++) {
-            leds[board_side_1[i][j]] = eColor;
-            leds[board_side_2[i][j]] = eColor;
+            leds[board_side_1[i][j]] = wColor;
+            leds[board_side_2[i][j]] = wColor;
         }
     }
 
@@ -273,7 +273,7 @@ void redblink() {
       leds[board_side_2[x_pos][y_pos]] = gColor;
       FastLED.show();
       delay(500);
-      leds[board_side_2[x_pos][y_pos]] = eColor;
+      leds[board_side_2[x_pos][y_pos]] = wColor;
       FastLED.show();
       delay(100);
     }
@@ -285,7 +285,7 @@ void blueblink() {
       leds[board_side_1[x_pos][y_pos]] = gColor;
       FastLED.show();
       delay(500);
-      leds[board_side_1[x_pos][y_pos]] = eColor;
+      leds[board_side_1[x_pos][y_pos]] = wColor;
       FastLED.show();
       delay(100);
     }
@@ -321,8 +321,8 @@ void reset() {
   // reset led board to be empty
   for (int i = 0; i < 9; i++) {
       for (int j = 0; j < 8; j++) {
-          leds[board_side_1[i][j]] = eColor;
-          leds[board_side_2[i][j]] = eColor;
+          leds[board_side_1[i][j]] = wColor;
+          leds[board_side_2[i][j]] = wColor;
       }
   }
 
