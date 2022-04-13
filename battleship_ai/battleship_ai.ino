@@ -174,13 +174,6 @@ bool placeable(int dimx, int dimy, int x, int y) {
   }
 }
 
-bool fireable() {
-  if (who == PIECE_X) {
-    return game2[x_pos][y_pos] == PIECE_EMPTY;
-  } 
-  return game1[x_pos][y_pos] == PIECE_EMPTY;
-}
-
 void winnerblink() {
   // modify to blink only winning squares later
   for (int i = 0; i < 9; i++) {
@@ -503,16 +496,22 @@ void placeRandom(int dimx, int dimy, int id) {
 }
 
 void fireRandom() {
-    int x = random(9);
-    int y = random(8);
-    while(game1[x][y] != -10) {
-       x = random(9);
-       y = random(8);
-    }
-    fire(x, y);
-    winner = win();
-    if (!winner) {
-      who = opposite(who);
+    if (who == PIECE_O) {
+      int x = random(9);
+      int y = random(8);
+      fire(x, y);
+      winner = win();
+      if (!winner) {
+        who = opposite(who);
+      }
+    } else {
+      int x = random(9);
+      int y = random(8);
+      fire(x, y);
+      winner = win();
+      if (!winner) {
+        who = opposite(who);
+      }
     }
     FastLED.show();
 }
