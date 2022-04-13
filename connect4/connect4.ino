@@ -71,7 +71,7 @@ int board_side_2[9][8] = { {136, 137, 138, 139, 140, 141, 142, 143},
 
 CRGB oColor = CRGB(255, 0, 0); // red
 CRGB xColor = CRGB(0, 0, 255); // blue
-CRGB wColor = CRGB(1, 1, 1); // white
+CRGB wColor = CRGB(255, 255, 255); // white
 CRGB eColor = CRGB(0, 0, 0); // clear/empty
 CRGB gColor = CRGB(0, 255, 0); //green
 
