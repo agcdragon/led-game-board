@@ -230,28 +230,28 @@ void setupcursor(int x, int y, int id) {
   while (!placed) {
       cursorblink(x, y);
       if (who == PIECE_X) {
-        if (digitalRead(LEFT) == LOW) {
+        if (digitalRead(LEFT) == LOW && placeable(x, y, x_pos, y_pos)) {
           long unsigned int currTime = millis();
           if (currTime - prevTime > 10) {
               x_pos = max(x_pos-1, 0);
           }
           prevTime = currTime;
         }
-        else if (digitalRead(RIGHT) == LOW) {
+        else if (digitalRead(RIGHT) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 x_pos = min(x_pos+1, 8);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(DOWN) == LOW) {
+        else if (digitalRead(DOWN) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 y_pos = max(y_pos-1, 0);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(UP) == LOW) {
+        else if (digitalRead(UP) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 y_pos = min(y_pos+1, 7);
@@ -268,28 +268,28 @@ void setupcursor(int x, int y, int id) {
         }
       } 
       else {
-        if (digitalRead(LEFT2) == LOW) {
+        if (digitalRead(LEFT2) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 x_pos = max(x_pos-1, 0);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(RIGHT2) == LOW) {
+        else if (digitalRead(RIGHT2) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 x_pos = min(x_pos+1, 8);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(DOWN2) == LOW) {
+        else if (digitalRead(DOWN2) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 y_pos = max(y_pos-1, 0);
             }
             prevTime = currTime;
         }
-        else if (digitalRead(UP2) == LOW) {
+        else if (digitalRead(UP2) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
                 y_pos = min(y_pos+1, 7);
