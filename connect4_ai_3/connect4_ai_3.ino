@@ -26,13 +26,16 @@ int scoreSet(vector<unsigned int>, unsigned int);
 int tabScore(vector<vector<int> >, unsigned int);
 vector<int> miniMax(vector<vector<int> >&, unsigned int, int, int, unsigned int);
 int heurFunction(unsigned int, unsigned int, unsigned int);
+void bluecursor();
+void redcursor();
+void winnerblink();
 
 // I'll be real and say this is just to avoid magic numbers
-unsigned int NUM_COL = 9; // how wide is the board
-unsigned int NUM_ROW = 8; // how tall
+unsigned int NUM_COL = 8; // how wide is the board
+unsigned int NUM_ROW = 9; // how tall
 unsigned int PLAYER = 1; // player number
 unsigned int COMPUTER = 2; // AI number
-unsigned int MAX_DEPTH = 5; // the default "difficulty" of the computer controlled AI
+unsigned int MAX_DEPTH = 1; // the default "difficulty" of the computer controlled AI
 int INT_MAX = 10000;
 int INT_MIN = -10000;
 
@@ -69,12 +72,12 @@ int resetDelay = 250;
 CRGB leds[NUM_LEDS];
 
 //Buttons
-const char LEFT1 = 12;
-const char RIGHT1 = 11;
-const char LEFT2 = 10;
-const char RIGHT2 = 9;
+const char LEFT1 = 10;
+const char RIGHT1 = 9;
+const char LEFT2 = 5;
+const char RIGHT2 = 4;
 const char PLACE1 = 8;
-const char PLACE2 = 7;
+const char PLACE2 = 3;
 
 // Directions
 #define DIR_UP    0
@@ -88,39 +91,58 @@ CRGB wColor = CRGB(255, 255, 255); // white
 CRGB eColor = CRGB(0, 0, 0); // clear/empty
 CRGB gColor = CRGB(0, 255, 0); //green
 
-
-
-
 /**
  * game playing function
  * loops between players while they take turns
  */
 void loop() {
-  printBoard(board); // print initial board
-  if (!gameOver) { // while no game over state
-    if (currentPlayer == COMPUTER) { // AI move
-      Serial.write("COMPUTER MOVE           ");
-      makeMove(board, aiMove(), COMPUTER);
-      currentPlayer = 1;
-      delay(2000);
-    }
-    else if (currentPlayer == PLAYER) { // player move
-      Serial.write("PLAYER MOVE           ");
-      makeMove(board, userMove(), PLAYER);
-      currentPlayer = 2;
-      delay(2000);
-    }
-    
-    else if (turns == NUM_ROW * NUM_COL) { // if max number of turns reached
+  //printBoard(board); // print initial board
+  if (!gameOver) {
+      Serial.write("bluecursor");
+      bluecursor();
+      /**
+      if (gameOver) {
+          delay(2000);
+          winnerblink();
+          delay(3000);
+          reset();
+          bluecursor();
+      }*/
+      Serial.write("redcursor");
+      redcursor();
+      /**
+      if (gameOver) {
+          delay(2000);
+          winnerblink();
+          delay(3000);
+          reset();
+          bluecursor();
+      }*/
+    } 
+} 
+
+
+void bluecursor() {
+  Serial.write("PLAYER MOVE");
+  int user_move = userMove();
+  Serial.print(user_move);
+  makeMove(board, user_move, PLAYER);
+}
+
+  
+void redcursor() {
+  Serial.write("AI MOVE");
+  int ai_move = aiMove();
+  Serial.print(ai_move);
+  makeMove(board, ai_move, COMPUTER);
+}
+  
+void winnerblink() {
+  /**
+  if (turns == NUM_ROW * NUM_COL) { // if max number of turns reached
       gameOver = true;
-    }
-    
-    gameOver = winningMove(board, currentPlayer); // check if player won
-    //currentPlayer = (currentPlayer == 1) ? 2 : 1; // switch player
-    turns++; // iterate number of turns
-    //cout << endl;
-    printBoard(board); // print board after successful move
-  } else { //if (gameOver){
+  }
+  else { //if (gameOver){
     if (turns == NUM_ROW * NUM_COL) { // if draw condition
       //cout << "Draw!" << endl;
       for (int i = 0; i < NUM_LEDS; i++) { 
@@ -145,9 +167,11 @@ void loop() {
       }
       reset();
     }
-    
-  } 
+  }
+  */ 
 }
+    
+
 
 /**
  * function that makes the move for the player
@@ -158,20 +182,28 @@ void loop() {
 void makeMove(vector<vector<int> >& b, int c, unsigned int p) {
   // start from bottom of board going up
   for (unsigned int r = 0; r < NUM_ROW; r++) {
-    if (b[c][r] == 0) { // first available spot
-      b[c][r] = p; // set piece
+    if (b[r][c] == 0) { // first available spot
+      b[r][c] = p; // set piece
       
       if (p == PLAYER) {
-          leds[board_side_1[c][r]] = oColor;
-          leds[board_side_2[c][r]] = oColor;
-          b[c][r] = 1;
-      } else { //player == COMPUTER
           leds[board_side_1[c][r]] = xColor;
           leds[board_side_2[c][r]] = xColor;
-          b[c][r] = 2;
+          b[r][c] = 1;
+          currentPlayer = 2;
+          Serial.write(currentPlayer);
+      } else { //player == COMPUTER
+          leds[board_side_1[c][r]] = oColor;
+          leds[board_side_2[c][r]] = oColor;
+          b[r][c] = 2;
+          currentPlayer = 1;
       }
+      turns++; // iterate number of turns
       FastLED.show();
-      //placed = true;
+      
+      gameOver = winningMove(board, currentPlayer); // check if player won
+      //cout << endl;
+      //printBoard(board); // print board after successful move
+  
       break;
      }
   }
@@ -204,6 +236,7 @@ int userMove() {
     else if (digitalRead(PLACE1) == LOW) {
         long unsigned int currTime = millis();
         if (currTime - prevTime > 10) {
+            placed = true;
             break;
         }
     }
@@ -486,7 +519,7 @@ void setup() {
   //reset game to be empty
   for (unsigned int r = 0; r < NUM_ROW; r++) {
     for (unsigned int c = 0; c < NUM_COL; c++) {
-      board[c][r] = 0; // make sure board is empty initially
+      board[r][c] = 0; // make sure board is empty initially
     }
   }
 
@@ -510,7 +543,7 @@ vector<vector<int> > copyBoard(vector<vector<int> > b) {
   vector<vector<int>> newBoard(NUM_ROW, vector<int>(NUM_COL));
   for (unsigned int r = 0; r < NUM_ROW; r++) {
     for (unsigned int c = 0; c < NUM_COL; c++) {
-      newBoard[c][r] = b[c][r]; // just straight copy
+      newBoard[r][c] = b[r][c]; // just straight copy
     }
   }
   return newBoard;
@@ -523,7 +556,7 @@ vector<vector<int> > copyBoard(vector<vector<int> > b) {
 void printBoard(vector<vector<int> > &b) {
   for (unsigned int i = 0; i < NUM_COL; i++) {
     //cout << " " << i;
-    Serial.write(" i");
+    Serial.print(i);
   }
   //cout << endl << "---------------" << endl;
   Serial.println();
@@ -531,7 +564,7 @@ void printBoard(vector<vector<int> > &b) {
     for (unsigned int c = 0; c < NUM_COL; c++) {
       //cout << "|";
       Serial.write("|");
-      switch (b[c][NUM_ROW - r - 1]) {
+      switch (b[NUM_ROW - r - 1][c]) {
       case 0: 
         Serial.write(" ");
         //cout << " "; 
@@ -573,8 +606,8 @@ void reset() { //reset board
   //reset led board to be empty
   for (unsigned int r = 0; r < NUM_ROW; r++) {
     for (unsigned int c = 0; c < NUM_COL; c++) {
-      leds[board_side_1[r][c]] = eColor;
-      leds[board_side_2[r][c]] = eColor;
+      leds[board_side_1[c][r]] = eColor;
+      leds[board_side_2[c][r]] = eColor;
     }
   }
 }

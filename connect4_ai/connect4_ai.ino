@@ -1,3 +1,10 @@
+// python-build-start
+// /opt/arduino-1.8.19/arduino
+// arduino:avr:uno
+// /dev/ttyACM0
+// python-build-end
+  
+  
   //LEDs
   #include <FastLED.h>
   #define NUM_LEDS    144
@@ -7,12 +14,14 @@
   CRGB leds[NUM_LEDS];
   
   //Buttons
-  const char LEFT1 = 12;
-  const char RIGHT1 = 11;
-  const char LEFT2 = 10;
-  const char RIGHT2 = 9;
+  //Buttons
+  const char LEFT1 = 10;
+  const char RIGHT1 = 9;
+  const char LEFT2 = 5;
+  const char RIGHT2 = 4;
   const char PLACE1 = 8;
-  const char PLACE2 = 7;
+  const char PLACE2 = 3;
+
   
   // Directions
   #define DIR_UP    0
@@ -196,15 +205,17 @@
   void redcursor() {
     bool placed = false;
     //check for ai win possibilities
+    /**
     for (int i = 0; i < 9; i++) {
         x_pos = i;
         int y1_pos = -1;
         for (int j = 0; j < 8; j++) {
             if (game[i][j] == PIECE_EMPTY) {
                 y1_pos = j;
+                break;
             }
         }
-        if (y1_pos > 0) {
+        if (y1_pos >= 0) {
             game[i][y1_pos] = PIECE_X;
             if (checkForWin(PIECE_X)) {
                 game[i][y1_pos] = PIECE_EMPTY;
@@ -226,9 +237,10 @@
           for (int j = 0; j < 8; j++) {
               if (game[i][j] == PIECE_EMPTY) {
                   y1_pos = j;
+                  break;
               }
           }
-          if (y1_pos > 0) {
+          if (y1_pos >= 0) {
               game[i][y1_pos] = PIECE_O;
               if (checkForWin(PIECE_O)) {
                   game[i][y1_pos] = PIECE_EMPTY;
@@ -242,13 +254,28 @@
             break;
            }
       }
-    }
+    }*/
     
     //random placeholder heuristic
     if (!placed) {
-       x_pos = random(8);
+       int count[]= {0,0,0,0,0,0,0,0,0};
+       for (int i=0; i<9; i++){
+        for (int j=0; j<8; j++){
+          if (game[i][j] == PIECE_X){
+            count[i] += 1;
+          }
+        }
+       }
+       int max_index = 4;       //declare before
+       int temp_max = 0;
+       for (int i=0; i<9; i++){
+        if (count[i] > temp_max){
+          temp_max = count[i];
+          max_index = i;
+        }
+       }
+       x_pos = max(max_index + random(8) - 6, 0);
        place();
-       placed=true;
     }
     
     return;
