@@ -202,9 +202,10 @@
         for (int j = 0; j < 8; j++) {
             if (game[i][j] == PIECE_EMPTY) {
                 y1_pos = j;
+                break;
             }
         }
-        if (y1_pos > 0) {
+        if (y1_pos >= 0) {
             game[i][y1_pos] = PIECE_X;
             if (checkForWin(PIECE_X)) {
                 game[i][y1_pos] = PIECE_EMPTY;
@@ -226,9 +227,10 @@
           for (int j = 0; j < 8; j++) {
               if (game[i][j] == PIECE_EMPTY) {
                   y1_pos = j;
+                  break;
               }
           }
-          if (y1_pos > 0) {
+          if (y1_pos >= 0) {
               game[i][y1_pos] = PIECE_O;
               if (checkForWin(PIECE_O)) {
                   game[i][y1_pos] = PIECE_EMPTY;
@@ -248,7 +250,6 @@
     if (!placed) {
        x_pos = random(8);
        place();
-       placed=true;
     }
     
     return;
