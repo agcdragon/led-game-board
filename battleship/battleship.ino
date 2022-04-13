@@ -129,7 +129,7 @@ void setup() {
       int dimx = ships[i][0];
       int dimy = ships[i][1];
       int id = ships[i][2];
-      setupcursor(dimx, dimy, id);
+      setupcursor2(dimx, dimy, id);
       x_pos = 4;
       y_pos = 4;
     }
@@ -228,85 +228,90 @@ void setupcursor(int x, int y, int id) {
   y_pos = 4;
   bool placed = false;
   while (!placed) {
-      cursorblink(x, y);
-      if (who == PIECE_X) {
-        if (digitalRead(LEFT) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = max(x_pos-1, 0);
-            }
-            prevTime = currTime;
+    cursorblink(x, y);
+    if (digitalRead(LEFT) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = max(x_pos-1, 0);
         }
-        else if (digitalRead() == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 8-x);
-            }
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(RIGHT) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = min(x_pos+1, 9-x);
         }
-        else if (digitalRead(DOWN) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = max(y_pos-1, 0);
-            }
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(DOWN) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = max(y_pos-1, 0);
         }
-        else if (digitalRead(UP) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 7-y);
-            }
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(UP) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = min(y_pos+1, 8-y);
         }
-        else if (digitalRead(PLACE) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                place(x, y, x_pos, y_pos, id);
-            }
-            placed = true;
-            prevTime = currTime;
+        prevTime = currTime;
+    }
+    else if (digitalRead(PLACE) == LOW && placeable(x, y, x_pos, y_pos)) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            place(x, y, x_pos, y_pos, id);
         }
-      } 
-      else {
-        if (digitalRead(LEFT2) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = max(x_pos-1, 0);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(RIGHT2) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 8-x);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(DOWN2) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = max(y_pos-1, 0);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(UP2) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 7-y);
-            }
-            prevTime = currTime;
-        }
-        else if (digitalRead(PLACE2) == LOW && placeable(x, y, x_pos, y_pos)) {
-            long unsigned int currTime = millis();
-            if (currTime - prevTime > 10) {
-                place(x, y, x_pos, y_pos, id);
-            }
-            placed = true;
-            prevTime = currTime;
-        }
-      }
+        placed = true;
+        prevTime = currTime;
+    }
   }
-  return;
+}
+
+void setupcursor2(int x, int y, int id) {
+// the cursor to place ships, blink potential ship placement
+  x_pos = 4;
+  y_pos = 4;
+  bool placed = false;
+  while (!placed) {
+    cursorblink(x, y);
+    if (digitalRead(LEFT2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = max(x_pos-1, 0);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(RIGHT2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            x_pos = min(x_pos+1, 9-x);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(DOWN2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = max(y_pos-1, 0);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(UP2) == LOW) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            y_pos = min(y_pos+1, 8-y);
+        }
+        prevTime = currTime;
+    }
+    else if (digitalRead(PLACE2) == LOW && placeable(x, y, x_pos, y_pos)) {
+        long unsigned int currTime = millis();
+        if (currTime - prevTime > 10) {
+            place(x, y, x_pos, y_pos, id);
+        }
+        placed = true;
+        prevTime = currTime;
+    }
+  }
 }
 
 
