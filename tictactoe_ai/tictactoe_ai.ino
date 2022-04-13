@@ -78,7 +78,6 @@ void setup() {
     pinMode(LEFT_PIN, INPUT_PULLUP);
     pinMode(RIGHT_PIN, INPUT_PULLUP);
     pinMode(PLACE_PIN, INPUT_PULLUP);
-    pinMode(RESET_PIN, INPUT_PULLUP);
 
     // setup ws2812b leds
     FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
