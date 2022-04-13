@@ -231,16 +231,16 @@ void setupcursor(int x, int y, int id) {
       cursorblink(x, y);
       if (who == PIECE_X) {
         if (digitalRead(LEFT) == LOW && placeable(x, y, x_pos, y_pos)) {
-          long unsigned int currTime = millis();
-          if (currTime - prevTime > 10) {
-              x_pos = max(x_pos-1, 0);
-          }
-          prevTime = currTime;
-        }
-        else if (digitalRead(RIGHT) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 8);
+                x_pos = max(x_pos-1, 0);
+            }
+            prevTime = currTime;
+        }
+        else if (digitalRead() == LOW && placeable(x, y, x_pos, y_pos)) {
+            long unsigned int currTime = millis();
+            if (currTime - prevTime > 10) {
+                x_pos = min(x_pos+1, 8-x);
             }
             prevTime = currTime;
         }
@@ -254,7 +254,7 @@ void setupcursor(int x, int y, int id) {
         else if (digitalRead(UP) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 7);
+                y_pos = min(y_pos+1, 7-y);
             }
             prevTime = currTime;
         }
@@ -278,7 +278,7 @@ void setupcursor(int x, int y, int id) {
         else if (digitalRead(RIGHT2) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                x_pos = min(x_pos+1, 8);
+                x_pos = min(x_pos+1, 8-x);
             }
             prevTime = currTime;
         }
@@ -292,7 +292,7 @@ void setupcursor(int x, int y, int id) {
         else if (digitalRead(UP2) == LOW && placeable(x, y, x_pos, y_pos)) {
             long unsigned int currTime = millis();
             if (currTime - prevTime > 10) {
-                y_pos = min(y_pos+1, 7);
+                y_pos = min(y_pos+1, 7-y);
             }
             prevTime = currTime;
         }
